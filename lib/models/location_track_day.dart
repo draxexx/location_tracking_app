@@ -4,7 +4,7 @@ import 'package:location_tracking_app/models/location_track.dart';
 
 part 'location_track_day.g.dart';
 
-@HiveType(typeId: 1)
+@HiveType(typeId: 2)
 class LocationTrackDay extends Equatable {
   @HiveField(0)
   final DateTime? date;

@@ -14,22 +14,19 @@ dependencies:
     sdk: flutter
     
   cupertino_icons: ^1.0.8
-
-  # State management
-  provider: ^6.1.2
-
+  # Equatable for value comparison
+  equatable: ^2.0.7
   # Geolocation
   geolocator: ^13.0.3
-
+  # GetIt for dependency injection
+  get_it: ^8.0.3
   # Hive Local Storage
   hive: ^2.2.3
   hive_flutter: ^1.1.0
-
   # Internationalization
   intl: ^0.20.2
-
-  # Equatable for value comparison
-  equatable: ^2.0.7
+  # State management
+  provider: ^6.1.2
 
   # Background location plugin
   background_location:

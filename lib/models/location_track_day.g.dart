@@ -8,7 +8,7 @@ part of 'location_track_day.dart';
 
 class LocationTrackDayAdapter extends TypeAdapter<LocationTrackDay> {
   @override
-  final int typeId = 1;
+  final int typeId = 2;
 
   @override
   LocationTrackDay read(BinaryReader reader) {
