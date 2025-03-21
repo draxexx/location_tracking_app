@@ -8,4 +8,11 @@ final class LogHelper {
       print("⚠️ $message");
     }
   }
+
+  /// This method is used to log an error message
+  static void error(String message) {
+    if (kDebugMode) {
+      print("❗ $message");
+    }
+  }
 }

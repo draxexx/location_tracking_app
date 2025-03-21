@@ -6,6 +6,7 @@ import 'package:location_tracking_app/core/utils/consts/hive_boxes.dart';
 import 'package:location_tracking_app/models/location.dart';
 import 'package:location_tracking_app/models/location_track.dart';
 import 'package:location_tracking_app/models/location_track_day.dart';
+import 'package:location_tracking_app/services/background_location_service.dart';
 import 'package:location_tracking_app/services/geolocator_service.dart';
 import 'package:location_tracking_app/services/local_storage/hive_local_storage.dart';
 import 'package:location_tracking_app/services/local_storage/local_storage_manager.dart';
@@ -19,7 +20,7 @@ final class ApplicationInitialize {
     WidgetsFlutterBinding.ensureInitialized();
 
     await _hiveInitialization();
-    _setupServiceLocator();
+    _setupLocator();
     _setSystemConfigurations();
 
     // TODO: remove from here
@@ -57,13 +58,19 @@ final class ApplicationInitialize {
     await Hive.openBox<LocationTrackDay>(HiveBoxes.locationTrackDay);
   }
 
-  // This method is used to setup the service locator
-  void _setupServiceLocator() {
+  // This method is used to setup the locator
+  void _setupLocator() {
     // Register Local Storage Managers
     getIt.registerLazySingleton<LocalStorageManager<LocationTrackDay>>(
       () => HiveLocalStorage(
         Hive.box<LocationTrackDay>(HiveBoxes.locationTrackDay),
       ),
+    );
+
+    // Register Services
+    getIt.registerLazySingleton<GeolocatorService>(() => GeolocatorService());
+    getIt.registerLazySingleton<BackgroundLocationService>(
+      () => BackgroundLocationService(),
     );
   }
 }

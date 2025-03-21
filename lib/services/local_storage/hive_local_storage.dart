@@ -1,4 +1,5 @@
 import 'package:hive/hive.dart';
+import 'package:location_tracking_app/core/utils/log_helper.dart';
 import 'package:location_tracking_app/services/local_storage/local_storage_manager.dart';
 
 class HiveLocalStorage<T> implements LocalStorageManager<T> {
@@ -8,26 +9,51 @@ class HiveLocalStorage<T> implements LocalStorageManager<T> {
 
   @override
   Future<void> add(String key, T value) async {
-    await box.put(key, value);
+    try {
+      await box.put(key, value);
+      LogHelper.info("$key added to the box, value: $value");
+    } catch (e) {
+      LogHelper.error("Error while adding to the box: $e");
+    }
   }
 
   @override
   Future<void> clear() async {
-    await box.clear();
+    try {
+      await box.clear();
+      LogHelper.info("Box cleared");
+    } catch (e) {
+      LogHelper.error("Error while clearing the box: $e");
+    }
   }
 
   @override
   T? get(String key) {
-    return box.get(key);
+    try {
+      return box.get(key);
+    } catch (e) {
+      LogHelper.error("Error while getting from the box: $e");
+      return null;
+    }
   }
 
   @override
   List<T> getAll() {
-    return box.values.toList();
+    try {
+      return box.values.toList();
+    } catch (e) {
+      LogHelper.error("Error while getting all from the box: $e");
+      return [];
+    }
   }
 
   @override
   Future<void> remove(String key) async {
-    await box.delete(key);
+    try {
+      await box.delete(key);
+      LogHelper.info("$key removed from the box");
+    } catch (e) {
+      LogHelper.error("Error while removing from the box: $e");
+    }
   }
 }

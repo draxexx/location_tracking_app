@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:location_tracking_app/core/init/application_initialize.dart';
-import 'package:location_tracking_app/providers/location_track_day_provider.dart';
+import 'package:location_tracking_app/core/init/state_initialize.dart';
 import 'package:location_tracking_app/screens/main_screen/main_screen.dart';
-import 'package:provider/provider.dart';
 
 void main() async {
   await ApplicationInitialize().init();
@@ -15,12 +14,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider<LocationTrackDayProvider>(
-          create: (context) => LocationTrackDayProvider(),
-        ),
-      ],
+    return StateInitialize(
       child: MaterialApp(
         title: 'Location Tracking App',
         debugShowCheckedModeBanner: false,

@@ -2,7 +2,21 @@ import 'dart:io';
 
 import 'package:geolocator/geolocator.dart';
 
+/// A service that provides the current location of the device.
 final class GeolocatorService {
+  /// This method is used to get the distance between two positions
+  /// [position1] is the first position
+  /// [position2] is the second position
+  double distanceBetween(Position position1, Position position2) {
+    return Geolocator.distanceBetween(
+      position1.latitude,
+      position1.longitude,
+      position2.latitude,
+      position2.longitude,
+    );
+  }
+
+  /// This method is used to get the current location
   Future<Position> determinePosition() async {
     bool serviceEnabled;
     LocationPermission permission;
