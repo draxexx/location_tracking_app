@@ -6,6 +6,7 @@ import 'package:location_tracking_app/core/utils/consts/hive_boxes.dart';
 import 'package:location_tracking_app/models/location.dart';
 import 'package:location_tracking_app/models/location_track.dart';
 import 'package:location_tracking_app/models/location_track_day.dart';
+import 'package:location_tracking_app/services/geolocator_service.dart';
 import 'package:location_tracking_app/services/local_storage/hive_local_storage.dart';
 import 'package:location_tracking_app/services/local_storage/local_storage_manager.dart';
 
@@ -20,6 +21,9 @@ final class ApplicationInitialize {
     await _hiveInitialization();
     _setupServiceLocator();
     _setSystemConfigurations();
+
+    // TODO: remove from here
+    GeolocatorService().determinePosition();
   }
 
   // This method is used to set the system configurations
