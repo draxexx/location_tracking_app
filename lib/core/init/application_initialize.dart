@@ -9,10 +9,10 @@ import 'package:location_tracking_app/models/location_track_day.dart';
 import 'package:location_tracking_app/services/local_storage/hive_local_storage.dart';
 import 'package:location_tracking_app/services/local_storage/local_storage_manager.dart';
 
+final getIt = GetIt.instance;
+
 /// This class used to initialize the application dependencies
 final class ApplicationInitialize {
-  final getIt = GetIt.instance;
-
   /// This method is used to initialize the application process
   Future<void> init() async {
     WidgetsFlutterBinding.ensureInitialized();

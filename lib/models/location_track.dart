@@ -57,7 +57,7 @@ class LocationTrack extends Equatable {
   }
 
   @override
-  List<Object?> get props => [location, entryTime, leftTime, timeSpent];
+  List<Object?> get props => [location];
 
   @override
   String toString() {
