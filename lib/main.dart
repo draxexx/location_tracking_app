@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:location_tracking_app/core/init/application_initialize.dart';
 import 'package:location_tracking_app/providers/location_track_day_provider.dart';
-import 'package:location_tracking_app/screens/main_screen.dart';
+import 'package:location_tracking_app/screens/main_screen/main_screen.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
