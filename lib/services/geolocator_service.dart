@@ -7,12 +7,17 @@ final class GeolocatorService {
   /// This method is used to get the distance between two positions
   /// [position1] is the first position
   /// [position2] is the second position
-  double distanceBetween(Position position1, Position position2) {
+  double distanceBetween(
+    double latitude1,
+    double longitude1,
+    double latitude2,
+    double longitude2,
+  ) {
     return Geolocator.distanceBetween(
-      position1.latitude,
-      position1.longitude,
-      position2.latitude,
-      position2.longitude,
+      latitude1,
+      longitude1,
+      latitude2,
+      longitude2,
     );
   }
 

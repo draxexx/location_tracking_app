@@ -38,7 +38,7 @@ class HiveLocalStorage<T> implements LocalStorageManager<T> {
   }
 
   @override
-  List<T> getAll() {
+  Future<List<T>> getAll() async {
     try {
       return box.values.toList();
     } catch (e) {

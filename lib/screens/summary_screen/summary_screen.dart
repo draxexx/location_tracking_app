@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:location_tracking_app/core/layouts/base_screen_layout.dart';
+import 'package:location_tracking_app/providers/location_track_day_provider.dart';
 import 'package:location_tracking_app/screens/past_days_screen/past_days_screen.dart';
 import 'package:location_tracking_app/screens/summary_screen/widgets/summary_items.dart';
+import 'package:provider/provider.dart';
 
 class SummaryScreen extends StatelessWidget {
   const SummaryScreen({super.key});
@@ -13,7 +15,16 @@ class SummaryScreen extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Expanded(child: SummaryItems()),
+          Expanded(
+            child: SummaryItems(
+              locationTracks:
+                  context
+                      .watch<LocationTrackDayProvider>()
+                      .locationTrackDay
+                      ?.locationTracks ??
+                  [],
+            ),
+          ),
           ElevatedButton(
             onPressed: () {
               Navigator.push(

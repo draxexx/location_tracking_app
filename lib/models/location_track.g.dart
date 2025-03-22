@@ -18,23 +18,20 @@ class LocationTrackAdapter extends TypeAdapter<LocationTrack> {
     };
     return LocationTrack(
       location: fields[0] as Location,
-      entryTime: fields[1] as DateTime?,
-      leftTime: fields[2] as DateTime?,
-      timeSpent: fields[3] as int,
+      lastUpdated: fields[1] as DateTime?,
+      timeSpent: fields[2] as int,
     );
   }
 
   @override
   void write(BinaryWriter writer, LocationTrack obj) {
     writer
-      ..writeByte(4)
+      ..writeByte(3)
       ..writeByte(0)
       ..write(obj.location)
       ..writeByte(1)
-      ..write(obj.entryTime)
+      ..write(obj.lastUpdated)
       ..writeByte(2)
-      ..write(obj.leftTime)
-      ..writeByte(3)
       ..write(obj.timeSpent);
   }
 

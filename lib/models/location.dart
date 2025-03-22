@@ -51,4 +51,6 @@ class Location extends Equatable {
   String toString() {
     return 'Location(displayName: $displayName, latitude: $latitude, longitude: $longitude)';
   }
+
+  bool get isTravel => latitude == null || longitude == null;
 }

@@ -9,29 +9,24 @@ class LocationTrack extends Equatable {
   @HiveField(0)
   final Location location;
   @HiveField(1)
-  final DateTime? entryTime;
+  final DateTime? lastUpdated;
   @HiveField(2)
-  final DateTime? leftTime;
-  @HiveField(3)
   final int timeSpent;
 
   const LocationTrack({
     required this.location,
-    this.entryTime,
-    this.leftTime,
+    this.lastUpdated,
     this.timeSpent = 0,
   });
 
   LocationTrack copyWith({
     Location? location,
-    DateTime? entryTime,
-    DateTime? leftTime,
+    DateTime? lastUpdated,
     int? timeSpent,
   }) {
     return LocationTrack(
       location: location ?? this.location,
-      entryTime: entryTime ?? this.entryTime,
-      leftTime: leftTime ?? this.leftTime,
+      lastUpdated: lastUpdated ?? this.lastUpdated,
       timeSpent: timeSpent ?? this.timeSpent,
     );
   }
@@ -39,10 +34,10 @@ class LocationTrack extends Equatable {
   factory LocationTrack.fromJson(Map<String, dynamic> json) {
     return LocationTrack(
       location: Location.fromJson(json['location']),
-      entryTime:
-          json['entryTime'] != null ? DateTime.parse(json['entryTime']) : null,
-      leftTime:
-          json['leftTime'] != null ? DateTime.parse(json['leftTime']) : null,
+      lastUpdated:
+          json['lastUpdated'] != null
+              ? DateTime.parse(json['lastUpdated'])
+              : null,
       timeSpent: json['timeSpent'] ?? 0,
     );
   }
@@ -50,8 +45,7 @@ class LocationTrack extends Equatable {
   Map<String, dynamic> toJson() {
     return {
       'location': location.toJson(),
-      'entryTime': entryTime?.toIso8601String(),
-      'leftTime': leftTime?.toIso8601String(),
+      'lastUpdated': lastUpdated?.toIso8601String(),
       'timeSpent': timeSpent,
     };
   }
@@ -61,6 +55,6 @@ class LocationTrack extends Equatable {
 
   @override
   String toString() {
-    return 'LocationTrack(location: $location, entryTime: $entryTime, leftTime: $leftTime, timeSpent: $timeSpent)';
+    return 'LocationTrack(location: $location, lastUpdated: $lastUpdated, timeSpent: $timeSpent)';
   }
 }
