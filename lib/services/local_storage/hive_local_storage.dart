@@ -28,7 +28,7 @@ class HiveLocalStorage<T> implements LocalStorageManager<T> {
   }
 
   @override
-  T? get(String key) {
+  Future<T?> get(String key) async {
     try {
       return box.get(key);
     } catch (e) {

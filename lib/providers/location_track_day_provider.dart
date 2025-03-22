@@ -209,4 +209,17 @@ class LocationTrackDayProvider with ChangeNotifier {
   bool _isSameDay(DateTime a, DateTime b) {
     return a.year == b.year && a.month == b.month && a.day == b.day;
   }
+
+  Future<void> loadTodayTrackDay() async {
+    final today = DateTime.now();
+    final key = _formatDateKey(today);
+
+    final saved = await storageManager.get(key);
+
+    if (saved != null) {
+      _locationTrackDay = saved;
+      _isLocationsInitialized = true;
+      notifyListeners();
+    }
+  }
 }

@@ -4,8 +4,25 @@ import 'package:location_tracking_app/providers/location_track_day_provider.dart
 import 'package:location_tracking_app/screens/summary_screen/summary_screen.dart';
 import 'package:provider/provider.dart';
 
-class MainScreen extends StatelessWidget {
+class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
+
+  @override
+  State<MainScreen> createState() => _MainScreenState();
+}
+
+class _MainScreenState extends State<MainScreen> {
+  @override
+  void initState() {
+    super.initState();
+
+    Future.microtask(() {
+      Provider.of<LocationTrackDayProvider>(
+        context,
+        listen: false,
+      ).loadTodayTrackDay();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
