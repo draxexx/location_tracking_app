@@ -4,37 +4,23 @@ import 'package:location_tracking_app/core/layouts/base_screen_layout.dart';
 import 'package:location_tracking_app/core/widgets/add_location_dialog.dart';
 import 'package:location_tracking_app/models/location.dart';
 import 'package:location_tracking_app/models/location_track_day.dart';
-import 'package:location_tracking_app/providers/location_provider.dart';
 import 'package:location_tracking_app/providers/location_track_day_provider.dart';
 import 'package:location_tracking_app/screens/summary_screen/summary_screen.dart';
 import 'package:location_tracking_app/services/geolocator_service.dart';
 import 'package:location_tracking_app/services/local_storage/local_storage_manager.dart';
 import 'package:provider/provider.dart';
 
-class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
+class MainScreen extends StatelessWidget {
+  MainScreen({super.key});
 
-  @override
-  State<MainScreen> createState() => _MainScreenState();
-}
+  static Route route() {
+    return MaterialPageRoute(builder: (_) => MainScreen());
+  }
 
-class _MainScreenState extends State<MainScreen> {
   final LocalStorageManager<LocationTrackDay> storageManager =
       getIt<LocalStorageManager<LocationTrackDay>>();
   final LocalStorageManager<Location> storageManager2 =
       getIt<LocalStorageManager<Location>>();
-
-  @override
-  void initState() {
-    super.initState();
-
-    Future.microtask(() async {
-      getIt<LocationTrackDayProvider>().loadTodayTrackDay();
-
-      await getIt<LocationProvider>().loadLocations();
-      await getIt<LocationProvider>().ensureTravelLocationExists();
-    });
-  }
 
   @override
   Widget build(BuildContext context) {

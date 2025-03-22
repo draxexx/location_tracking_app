@@ -24,9 +24,6 @@ final class ApplicationInitialize {
     await _hiveInitialization();
     _setupLocator();
     _setSystemConfigurations();
-
-    // TODO: remove from here
-    GeolocatorService().determinePosition();
   }
 
   // This method is used to set the system configurations
@@ -63,7 +60,13 @@ final class ApplicationInitialize {
 
   // This method is used to setup the locator
   void _setupLocator() {
-    // Register Local Storage Managers
+    _registerLocalStorages();
+    _registerServices();
+    _registerProviders();
+  }
+
+  // This method is used to register the local storages
+  void _registerLocalStorages() {
     getIt.registerLazySingleton<LocalStorageManager<LocationTrackDay>>(
       () => HiveLocalStorage(
         Hive.box<LocationTrackDay>(HiveBoxes.locationTrackDay),
@@ -72,14 +75,18 @@ final class ApplicationInitialize {
     getIt.registerLazySingleton<LocalStorageManager<Location>>(
       () => HiveLocalStorage(Hive.box<Location>(HiveBoxes.location)),
     );
+  }
 
-    // Register Services
+  // This method is used to register the services
+  void _registerServices() {
     getIt.registerLazySingleton<GeolocatorService>(() => GeolocatorService());
     getIt.registerLazySingleton<BackgroundLocationService>(
       () => BackgroundLocationService(),
     );
+  }
 
-    // Register Providers
+  // This method is used to register the providers
+  void _registerProviders() {
     getIt.registerLazySingleton<LocationProvider>(
       () => LocationProvider(storage: getIt<LocalStorageManager<Location>>()),
     );

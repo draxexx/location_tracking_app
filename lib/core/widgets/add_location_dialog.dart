@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:location_tracking_app/core/init/application_initialize.dart';
 import 'package:location_tracking_app/models/location.dart';
 import 'package:location_tracking_app/providers/location_provider.dart';
+import 'package:location_tracking_app/providers/location_track_day_provider.dart';
 import 'package:location_tracking_app/services/geolocator_service.dart';
-import 'package:provider/provider.dart';
 
 void showAddLocationDialog(
   BuildContext context,
@@ -31,7 +32,7 @@ void showAddLocationDialog(
             child: const Text('İptal'),
           ),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               final name = controller.text.trim();
               if (name.isEmpty) return;
 
@@ -41,10 +42,9 @@ void showAddLocationDialog(
                 longitude: position.longitude,
               );
 
-              Provider.of<LocationProvider>(
-                context,
-                listen: false,
-              ).addLocation(newLocation);
+              await getIt<LocationProvider>().addLocation(newLocation);
+              getIt<LocationTrackDayProvider>()
+                  .refreshTrackDayWithNewLocations();
 
               Navigator.of(ctx).pop();
 

@@ -11,6 +11,10 @@ part 'widgets/past_days_items.dart';
 class PastDaysScreen extends StatelessWidget {
   PastDaysScreen({super.key});
 
+  static Route route() {
+    return MaterialPageRoute(builder: (_) => PastDaysScreen());
+  }
+
   final LocalStorageManager<LocationTrackDay> storageManager =
       getIt<LocalStorageManager<LocationTrackDay>>();
 

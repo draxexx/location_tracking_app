@@ -26,36 +26,15 @@ class LocationTrackDayProvider with ChangeNotifier {
   LocationTrackDay? get locationTrackDay => _locationTrackDay;
 
   bool _isTracking = false;
-  bool _isLocationsInitialized = false;
   DateTime? _lastUpdate;
   List<LocationTrack> _activeLocations = [];
   Timer? _tickTimer;
 
   final double _geofenceRadius = 50;
 
-  void _initializeLocations(Position position) {
-    final today = DateTime.now();
-    final locationProvider = getIt<LocationProvider>();
-    final allLocations = locationProvider.locations;
-
-    _locationTrackDay = LocationTrackDay(
-      date: today,
-      locationTracks:
-          allLocations.map((loc) {
-            return LocationTrack(
-              location: loc,
-              lastUpdated: today,
-              timeSpent: 0,
-            );
-          }).toList(),
-    );
-  }
-
   /// Starts the location tracking service and listens for updates
   Future<void> startTracking() async {
     if (_isTracking) return;
-
-    await loadTodayTrackDay();
 
     await backgroundLocationService.startLocationService();
     backgroundLocationService.getLocationUpdates(handleLocationUpdate);
@@ -85,13 +64,6 @@ class LocationTrackDayProvider with ChangeNotifier {
   }
 
   void handleLocationUpdate(Position position) {
-    if (!_isLocationsInitialized && _locationTrackDay == null) {
-      _initializeLocations(position);
-      _isLocationsInitialized = true;
-    } else {
-      _isLocationsInitialized = true;
-    }
-
     _updateTimeSpent(DateTime.now());
 
     final matched = _getMatchedLocations(position);
@@ -206,7 +178,9 @@ class LocationTrackDayProvider with ChangeNotifier {
     return a.year == b.year && a.month == b.month && a.day == b.day;
   }
 
-  Future<void> loadTodayTrackDay() async {
+  /// Loads the location track day for today
+  /// If the day does not exist, it will initialize the day with the locations
+  Future<void> initializeLocationTrackDay() async {
     final today = DateTime.now();
     final key = _formatDateKey(today);
 
@@ -228,8 +202,45 @@ class LocationTrackDayProvider with ChangeNotifier {
       }
 
       _locationTrackDay = saved.copyWith(locationTracks: updatedTracks);
-      _isLocationsInitialized = true;
-      notifyListeners();
+    } else {
+      _locationTrackDay = LocationTrackDay(
+        date: today,
+        locationTracks:
+            allLocations.map((loc) {
+              return LocationTrack(
+                location: loc,
+                lastUpdated: today,
+                timeSpent: 0,
+              );
+            }).toList(),
+      );
     }
+
+    notifyListeners();
+  }
+
+  void refreshTrackDayWithNewLocations() {
+    if (_locationTrackDay == null) return;
+
+    final allLocations = getIt<LocationProvider>().locations;
+    final today = DateTime.now();
+
+    final updatedTracks = [..._locationTrackDay!.locationTracks!];
+
+    for (final loc in allLocations) {
+      final exists = updatedTracks.any(
+        (track) => track.location.displayName == loc.displayName,
+      );
+      if (!exists) {
+        updatedTracks.add(
+          LocationTrack(location: loc, timeSpent: 0, lastUpdated: today),
+        );
+      }
+    }
+
+    _locationTrackDay = _locationTrackDay!.copyWith(
+      locationTracks: updatedTracks,
+    );
+    notifyListeners();
   }
 }

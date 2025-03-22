@@ -8,6 +8,10 @@ import 'package:provider/provider.dart';
 class SummaryScreen extends StatelessWidget {
   const SummaryScreen({super.key});
 
+  static Route route() {
+    return MaterialPageRoute(builder: (_) => const SummaryScreen());
+  }
+
   @override
   Widget build(BuildContext context) {
     return BaseScreenLayout(
