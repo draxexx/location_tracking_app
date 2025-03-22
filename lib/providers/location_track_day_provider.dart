@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:location_tracking_app/core/init/application_initialize.dart';
@@ -27,6 +29,7 @@ class LocationTrackDayProvider with ChangeNotifier {
   bool _isLocationsInitialized = false;
   DateTime? _lastUpdate;
   List<LocationTrack> _activeLocations = [];
+  Timer? _tickTimer;
 
   final double _geofenceRadius = 50;
 
@@ -75,6 +78,10 @@ class LocationTrackDayProvider with ChangeNotifier {
 
     _lastUpdate = DateTime.now();
     _isTracking = true;
+
+    _tickTimer = Timer.periodic(Duration(seconds: 30), (_) {
+      _updateTimeSpent(DateTime.now());
+    });
   }
 
   /// Stops the location tracking service and finalizes any remaining duration
@@ -85,24 +92,27 @@ class LocationTrackDayProvider with ChangeNotifier {
     await _saveCurrentTrackDay();
     await backgroundLocationService.stopLocationService();
 
+    _tickTimer?.cancel();
+    _tickTimer = null;
+
     _activeLocations = [];
     _lastUpdate = null;
     _isTracking = false;
   }
 
-  /// Called when a new location update is received
   void handleLocationUpdate(Position position) {
-    if (!_isLocationsInitialized) {
+    if (!_isLocationsInitialized && _locationTrackDay == null) {
       _initializeLocations(position);
+      _isLocationsInitialized = true;
+    } else {
       _isLocationsInitialized = true;
     }
 
-    final now = DateTime.now();
-    _updateTimeSpent(now);
+    _updateTimeSpent(DateTime.now());
 
     final matched = _getMatchedLocations(position);
     _activeLocations = matched.isNotEmpty ? matched : [_getTravelLocation()];
-    _lastUpdate = now;
+    _lastUpdate = DateTime.now();
   }
 
   void _updateTimeSpent(DateTime now) {
@@ -127,8 +137,10 @@ class LocationTrackDayProvider with ChangeNotifier {
       );
     }
 
-    final delta = now.difference(last).inSeconds;
-    _applyDeltaToTracks(delta, now);
+    final deltaSeconds = now.difference(last).inSeconds;
+    if (deltaSeconds <= 0) return;
+
+    _applyDeltaToTracks(deltaSeconds, now);
   }
 
   void _applyDeltaToTracks(int delta, DateTime updateTime) {

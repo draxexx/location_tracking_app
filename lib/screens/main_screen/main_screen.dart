@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:location_tracking_app/core/init/application_initialize.dart';
 import 'package:location_tracking_app/core/layouts/base_screen_layout.dart';
+import 'package:location_tracking_app/models/location_track_day.dart';
 import 'package:location_tracking_app/providers/location_track_day_provider.dart';
 import 'package:location_tracking_app/screens/summary_screen/summary_screen.dart';
+import 'package:location_tracking_app/services/local_storage/local_storage_manager.dart';
 import 'package:provider/provider.dart';
 
 class MainScreen extends StatefulWidget {
@@ -12,6 +15,9 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
+  final LocalStorageManager<LocationTrackDay> storageManager =
+      getIt<LocalStorageManager<LocationTrackDay>>();
+
   @override
   void initState() {
     super.initState();
@@ -44,8 +50,8 @@ class _MainScreenState extends State<MainScreen> {
               child: const Text('Clock Out'),
             ),
             ElevatedButton(
-              onPressed: () {},
-              child: const Text('Save Location'),
+              onPressed: () => storageManager.clear(),
+              child: const Text('Clear'),
             ),
             ElevatedButton(
               onPressed: () {
