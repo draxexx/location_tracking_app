@@ -5,8 +5,10 @@ import 'package:geolocator/geolocator.dart';
 /// A service that provides the current location of the device.
 final class GeolocatorService {
   /// This method is used to get the distance between two positions
-  /// [position1] is the first position
-  /// [position2] is the second position
+  /// [latitude1] is the latitude of the first position
+  /// [longitude1] is the longitude of the first position
+  /// [latitude2] is the latitude of the second position
+  /// [longitude2] is the longitude of the second position
   double distanceBetween(
     double latitude1,
     double longitude1,
@@ -21,42 +23,50 @@ final class GeolocatorService {
     );
   }
 
-  /// This method is used to get the current location
-  Future<Position> determinePosition() async {
-    bool serviceEnabled;
-    LocationPermission permission;
+  /// Check if the location service is enabled
+  Future<bool> isLocationServiceEnabled() async {
+    return await Geolocator.isLocationServiceEnabled();
+  }
 
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+  /// Check if the app has permission to access the location
+  Future<LocationPermission> checkPermission() async {
+    return await Geolocator.checkPermission();
+  }
 
-    if (!serviceEnabled) {
-      return Future.error('Location services are disabled.');
-    }
+  /// Request permission to access the location
+  Future<LocationPermission> requestPermission() async {
+    return await Geolocator.requestPermission();
+  }
 
-    permission = await Geolocator.checkPermission();
+  /// Check if the app has permission to access the location
+  Future<bool> hasPermission() async {
+    final permission = await Geolocator.checkPermission();
+    return permission == LocationPermission.always ||
+        permission == LocationPermission.whileInUse;
+  }
 
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-
-      if (permission == LocationPermission.denied) {
-        return Future.error('Location permissions are denied');
-      }
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      return Future.error(
-        'Location permissions are permanently denied, we cannot request permissions.',
-      );
-    }
+  /// Needs always permission to get the location on background
+  Future<bool> needsAlwaysPermission() async {
+    final permission = await Geolocator.checkPermission();
 
     if (permission == LocationPermission.whileInUse) {
-      print("while in use");
       if (Platform.isAndroid) {
-        permission = await Geolocator.requestPermission();
+        final newPermission = await Geolocator.requestPermission();
+        return newPermission != LocationPermission.always;
       } else if (Platform.isIOS) {
-        await Geolocator.openAppSettings();
+        return true;
       }
     }
 
+    return false;
+  }
+
+  /// Get the current position of the device
+  Future<Position> getCurrentPosition() async {
     return await Geolocator.getCurrentPosition();
+  }
+
+  Future<void> openSettings() async {
+    await Geolocator.openAppSettings();
   }
 }

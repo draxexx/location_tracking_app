@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:location_tracking_app/core/init/application_initialize.dart';
 import 'package:location_tracking_app/core/layouts/base_screen_layout.dart';
+import 'package:location_tracking_app/core/utils/permission_helper.dart';
 import 'package:location_tracking_app/core/widgets/add_location_dialog.dart';
 import 'package:location_tracking_app/core/widgets/custom_button.dart';
 import 'package:location_tracking_app/models/location.dart';
@@ -22,22 +23,51 @@ class MainScreen extends StatelessWidget {
   final LocalStorageManager<Location> storageManager2 =
       getIt<LocalStorageManager<Location>>();
 
-  // Add a new location to the list of locations
-  void _addNewLocation(BuildContext context) {
-    showAddLocationDialog(
-      context: context,
-      onSubmit: (name) async {
-        await getIt<LocationTrackDayProvider>().addLocationAndRefreshTrackDay(
-          name,
-        );
+  final _locationTrackDayProvider = getIt<LocationTrackDayProvider>();
 
-        if (context.mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text("Location added: $name")));
-        }
-      },
-    );
+  Future<bool> _hasPermission(BuildContext context) async {
+    await _locationTrackDayProvider.checkAndRequestPermission();
+
+    if (context.mounted) {
+      return await PermissionHelper.checkAndRequestPermission(
+        context: context,
+        permissionStatus: _locationTrackDayProvider.permissionStatus,
+      );
+    }
+
+    return false;
+  }
+
+  void _startTracking(BuildContext context) async {
+    final hasPermission = await _hasPermission(context);
+    if (!hasPermission) return;
+
+    await _locationTrackDayProvider.startTracking();
+  }
+
+  void _stopTracking() async {
+    await _locationTrackDayProvider.stopTracking();
+  }
+
+  // Add a new location to the list of locations
+  void _addNewLocation(BuildContext context) async {
+    final hasPermission = await _hasPermission(context);
+    if (!hasPermission) return;
+
+    if (context.mounted) {
+      showAddLocationDialog(
+        context: context,
+        onSubmit: (name) async {
+          await _locationTrackDayProvider.addLocationAndRefreshTrackDay(name);
+
+          if (context.mounted) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text("Location added: $name")));
+          }
+        },
+      );
+    }
   }
 
   @override
@@ -51,15 +81,12 @@ class MainScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             CustomButton(
-              onPressed:
-                  () =>
-                      context.read<LocationTrackDayProvider>().startTracking(),
+              onPressed: () => _startTracking(context),
               text: "Clock In",
               isDisabled: isTracking,
             ),
             CustomButton(
-              onPressed:
-                  () => context.read<LocationTrackDayProvider>().stopTracking(),
+              onPressed: _stopTracking,
               text: "Clock Out",
               isDisabled: !isTracking,
             ),

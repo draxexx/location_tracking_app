@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:location_tracking_app/core/init/application_initialize.dart';
+import 'package:location_tracking_app/core/utils/consts/enums/location_permission_status.dart';
 import 'package:location_tracking_app/core/utils/extensions/datetime_extensions.dart';
 import 'package:location_tracking_app/models/location.dart';
 import 'package:location_tracking_app/models/location_track.dart';
@@ -29,6 +30,9 @@ class LocationTrackDayProvider with ChangeNotifier {
 
   bool _isTracking = false;
   bool get isTracking => _isTracking;
+
+  LocationPermissionStatus _permissionStatus = LocationPermissionStatus.initial;
+  LocationPermissionStatus get permissionStatus => _permissionStatus;
 
   DateTime? _lastUpdate;
   List<LocationTrack> _activeLocations = [];
@@ -250,7 +254,7 @@ class LocationTrackDayProvider with ChangeNotifier {
 
   /// Adds a new location and refreshes the location track day
   Future<void> addLocationAndRefreshTrackDay(String name) async {
-    final position = await geolocatorService.determinePosition();
+    final position = await geolocatorService.getCurrentPosition();
 
     final newLocation = Location(
       displayName: name,
@@ -260,5 +264,43 @@ class LocationTrackDayProvider with ChangeNotifier {
 
     await getIt<LocationProvider>().addLocation(newLocation);
     refreshTrackDayWithNewLocations();
+  }
+
+  Future<void> checkAndRequestPermission() async {
+    final serviceEnabled = await geolocatorService.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      _permissionStatus = LocationPermissionStatus.serviceDisabled;
+      notifyListeners();
+      return;
+    }
+
+    LocationPermission permission = await geolocatorService.checkPermission();
+
+    if (permission == LocationPermission.denied) {
+      permission = await geolocatorService.requestPermission();
+      if (permission == LocationPermission.denied) {
+        _permissionStatus = LocationPermissionStatus.denied;
+        notifyListeners();
+        return;
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      _permissionStatus = LocationPermissionStatus.deniedForever;
+      notifyListeners();
+      return;
+    }
+
+    if (permission == LocationPermission.whileInUse) {
+      final needsAlways = await geolocatorService.needsAlwaysPermission();
+      if (needsAlways) {
+        _permissionStatus = LocationPermissionStatus.grantedWhileInUse;
+        notifyListeners();
+        return;
+      }
+    }
+
+    _permissionStatus = LocationPermissionStatus.grantedAlways;
+    notifyListeners();
   }
 }

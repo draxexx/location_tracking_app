@@ -6,6 +6,7 @@ import 'package:location_tracking_app/core/utils/consts/hive_boxes.dart';
 import 'package:location_tracking_app/models/location.dart';
 import 'package:location_tracking_app/models/location_track.dart';
 import 'package:location_tracking_app/models/location_track_day.dart';
+import 'package:location_tracking_app/providers/geolocator_provider.dart';
 import 'package:location_tracking_app/providers/location_provider.dart';
 import 'package:location_tracking_app/providers/location_track_day_provider.dart';
 import 'package:location_tracking_app/services/background_location_service.dart';
@@ -96,6 +97,9 @@ final class ApplicationInitialize {
         geolocatorService: getIt<GeolocatorService>(),
         storage: getIt<LocalStorageManager<LocationTrackDay>>(),
       ),
+    );
+    getIt.registerLazySingleton<GeolocatorProvider>(
+      () => GeolocatorProvider(geolocatorService: getIt<GeolocatorService>()),
     );
   }
 }
