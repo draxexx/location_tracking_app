@@ -3,9 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:location_tracking_app/core/init/application_initialize.dart';
-import 'package:location_tracking_app/models/location.dart';
 import 'package:location_tracking_app/models/location_track.dart';
 import 'package:location_tracking_app/models/location_track_day.dart';
+import 'package:location_tracking_app/providers/location_provider.dart';
 import 'package:location_tracking_app/services/background_location_service.dart';
 import 'package:location_tracking_app/services/geolocator_service.dart';
 import 'package:location_tracking_app/services/local_storage/local_storage_manager.dart';
@@ -14,12 +14,12 @@ import 'package:location_tracking_app/services/local_storage/local_storage_manag
 class LocationTrackDayProvider with ChangeNotifier {
   final BackgroundLocationService backgroundLocationService;
   final GeolocatorService geolocatorService;
-  final LocalStorageManager<LocationTrackDay> storageManager =
-      getIt<LocalStorageManager<LocationTrackDay>>();
+  final LocalStorageManager<LocationTrackDay> storage;
 
   LocationTrackDayProvider({
     required this.backgroundLocationService,
     required this.geolocatorService,
+    required this.storage,
   });
 
   LocationTrackDay? _locationTrackDay;
@@ -33,45 +33,29 @@ class LocationTrackDayProvider with ChangeNotifier {
 
   final double _geofenceRadius = 50;
 
-  // TODO: remove here
   void _initializeLocations(Position position) {
+    final today = DateTime.now();
+    final locationProvider = getIt<LocationProvider>();
+    final allLocations = locationProvider.locations;
+
     _locationTrackDay = LocationTrackDay(
-      date: DateTime.now(),
-      locationTracks: [
-        LocationTrack(
-          location: Location(
-            latitude: position.latitude,
-            longitude: position.longitude,
-            displayName: "Home",
-          ),
-          lastUpdated: DateTime.now(),
-          timeSpent: 0,
-        ),
-        LocationTrack(
-          location: Location(
-            latitude: position.latitude + (70 / 111320),
-            longitude: position.longitude,
-            displayName: "Office",
-          ),
-          lastUpdated: DateTime.now(),
-          timeSpent: 0,
-        ),
-        LocationTrack(
-          location: Location(
-            latitude: null,
-            longitude: null,
-            displayName: "Travel",
-          ),
-          lastUpdated: DateTime.now(),
-          timeSpent: 0,
-        ),
-      ],
+      date: today,
+      locationTracks:
+          allLocations.map((loc) {
+            return LocationTrack(
+              location: loc,
+              lastUpdated: today,
+              timeSpent: 0,
+            );
+          }).toList(),
     );
   }
 
   /// Starts the location tracking service and listens for updates
   Future<void> startTracking() async {
     if (_isTracking) return;
+
+    await loadTodayTrackDay();
 
     await backgroundLocationService.startLocationService();
     backgroundLocationService.getLocationUpdates(handleLocationUpdate);
@@ -181,7 +165,7 @@ class LocationTrackDayProvider with ChangeNotifier {
       return;
 
     final key = _formatDateKey(_locationTrackDay!.date!);
-    await storageManager.add(key, _locationTrackDay!);
+    await storage.add(key, _locationTrackDay!);
   }
 
   String _formatDateKey(DateTime date) {
@@ -226,10 +210,24 @@ class LocationTrackDayProvider with ChangeNotifier {
     final today = DateTime.now();
     final key = _formatDateKey(today);
 
-    final saved = await storageManager.get(key);
+    final saved = await storage.get(key);
+    final allLocations = getIt<LocationProvider>().locations;
 
     if (saved != null) {
-      _locationTrackDay = saved;
+      final updatedTracks = [...saved.locationTracks!];
+
+      for (final loc in allLocations) {
+        final exists = updatedTracks.any(
+          (track) => track.location.displayName == loc.displayName,
+        );
+        if (!exists) {
+          updatedTracks.add(
+            LocationTrack(location: loc, timeSpent: 0, lastUpdated: today),
+          );
+        }
+      }
+
+      _locationTrackDay = saved.copyWith(locationTracks: updatedTracks);
       _isLocationsInitialized = true;
       notifyListeners();
     }
