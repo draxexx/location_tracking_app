@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:location_tracking_app/core/init/application_initialize.dart';
-import 'package:location_tracking_app/core/utils/consts/enums/location_permission_status.dart';
 import 'package:location_tracking_app/core/utils/extensions/datetime_extensions.dart';
 import 'package:location_tracking_app/models/location.dart';
 import 'package:location_tracking_app/models/location_track.dart';
@@ -14,7 +13,7 @@ import 'package:location_tracking_app/services/geolocator_service.dart';
 import 'package:location_tracking_app/services/local_storage/local_storage_manager.dart';
 
 /// This provider is used to manage the location tracking for a day
-class LocationTrackDayProvider with ChangeNotifier {
+class LocationTrackDayProvider with ChangeNotifier, WidgetsBindingObserver {
   final BackgroundLocationService backgroundLocationService;
   final GeolocatorService geolocatorService;
   final LocalStorageManager<LocationTrackDay> storage;
@@ -23,16 +22,15 @@ class LocationTrackDayProvider with ChangeNotifier {
     required this.backgroundLocationService,
     required this.geolocatorService,
     required this.storage,
-  });
+  }) {
+    WidgetsBinding.instance.addObserver(this);
+  }
 
   LocationTrackDay? _locationTrackDay;
   LocationTrackDay? get locationTrackDay => _locationTrackDay;
 
   bool _isTracking = false;
   bool get isTracking => _isTracking;
-
-  LocationPermissionStatus _permissionStatus = LocationPermissionStatus.initial;
-  LocationPermissionStatus get permissionStatus => _permissionStatus;
 
   DateTime? _lastUpdate;
   List<LocationTrack> _activeLocations = [];
@@ -44,13 +42,14 @@ class LocationTrackDayProvider with ChangeNotifier {
   Future<void> startTracking() async {
     if (_isTracking) return;
 
-    await backgroundLocationService.startLocationService();
+    await backgroundLocationService.startLocationService(distanceFilter: 30);
     backgroundLocationService.getLocationUpdates(_handleLocationUpdate);
 
     _lastUpdate = DateTime.now();
     _isTracking = true;
 
-    _tickTimer = Timer.periodic(const Duration(seconds: 30), (_) {
+    // If the user is not moving, then update the time spent every minute
+    _tickTimer = Timer.periodic(const Duration(minutes: 1), (_) {
       _updateTimeSpent(DateTime.now());
     });
     notifyListeners();
@@ -73,6 +72,7 @@ class LocationTrackDayProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  // Handles the location updates and updates the active locations
   void _handleLocationUpdate(Position position) {
     _updateTimeSpent(DateTime.now());
 
@@ -81,6 +81,7 @@ class LocationTrackDayProvider with ChangeNotifier {
     _lastUpdate = DateTime.now();
   }
 
+  // Updates the time spent for the active locations
   void _updateTimeSpent(DateTime now) {
     if (_lastUpdate == null ||
         _activeLocations.isEmpty ||
@@ -90,6 +91,7 @@ class LocationTrackDayProvider with ChangeNotifier {
 
     DateTime last = _lastUpdate!;
 
+    // Handle the case where the day has changed
     while (!last.isSameDay(now)) {
       final midnight = DateTime(last.year, last.month, last.day + 1);
       final delta = midnight.difference(last).inSeconds;
@@ -110,6 +112,7 @@ class LocationTrackDayProvider with ChangeNotifier {
     _applyDeltaToTracks(deltaSeconds, now);
   }
 
+  // Applies the delta to the active locations
   void _applyDeltaToTracks(int delta, DateTime updateTime) {
     final updatedTracks =
         _locationTrackDay!.locationTracks!.map((track) {
@@ -130,9 +133,12 @@ class LocationTrackDayProvider with ChangeNotifier {
     _locationTrackDay = _locationTrackDay!.copyWith(
       locationTracks: updatedTracks,
     );
+
+    print("Updated tracks: $_locationTrackDay");
     notifyListeners();
   }
 
+  // Clones the tracks with the time reset to the given date
   List<LocationTrack> _cloneTracksWithResetTime(DateTime date) {
     return _locationTrackDay!.locationTracks!.map((track) {
       return LocationTrack(
@@ -143,19 +149,25 @@ class LocationTrackDayProvider with ChangeNotifier {
     }).toList();
   }
 
+  // Saves the current track day to the local storage
   Future<void> _saveCurrentTrackDay() async {
-    if (_locationTrackDay == null || _locationTrackDay!.locationTracks == null)
+    if (_locationTrackDay == null ||
+        _locationTrackDay!.locationTracks == null) {
       return;
+    }
 
     final key = _formatDateKey(_locationTrackDay!.date!);
     await storage.add(key, _locationTrackDay!);
   }
 
+  // Formats the date to a key for the local storage
   String _formatDateKey(DateTime date) {
     return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   }
 
+  // Get the locations that are within the geofence radius
   List<LocationTrack> _getMatchedLocations(Position currentPosition) {
+    // Filter out locations that have no coordinates
     final geofences =
         _locationTrackDay?.locationTracks
             ?.where(
@@ -165,8 +177,10 @@ class LocationTrackDayProvider with ChangeNotifier {
             )
             .toList();
 
+    // If no locations are available, return an empty list
     if (geofences == null || geofences.isEmpty) return [];
 
+    // Return the locations that are within the geofence radius
     return geofences.where((track) {
       final distance = geolocatorService.distanceBetween(
         currentPosition.latitude,
@@ -178,6 +192,7 @@ class LocationTrackDayProvider with ChangeNotifier {
     }).toList();
   }
 
+  // Get the travel location track
   LocationTrack _getTravelLocation() {
     return _locationTrackDay!.locationTracks!.firstWhere(
       (track) =>
@@ -266,41 +281,19 @@ class LocationTrackDayProvider with ChangeNotifier {
     refreshTrackDayWithNewLocations();
   }
 
-  Future<void> checkAndRequestPermission() async {
-    final serviceEnabled = await geolocatorService.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      _permissionStatus = LocationPermissionStatus.serviceDisabled;
-      notifyListeners();
-      return;
+  // Handle app lifecycle changes
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) async {
+    // Save the current track day when the app is paused
+    if (state == AppLifecycleState.paused) {
+      await _saveCurrentTrackDay();
     }
+  }
 
-    LocationPermission permission = await geolocatorService.checkPermission();
-
-    if (permission == LocationPermission.denied) {
-      permission = await geolocatorService.requestPermission();
-      if (permission == LocationPermission.denied) {
-        _permissionStatus = LocationPermissionStatus.denied;
-        notifyListeners();
-        return;
-      }
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      _permissionStatus = LocationPermissionStatus.deniedForever;
-      notifyListeners();
-      return;
-    }
-
-    if (permission == LocationPermission.whileInUse) {
-      final needsAlways = await geolocatorService.needsAlwaysPermission();
-      if (needsAlways) {
-        _permissionStatus = LocationPermissionStatus.grantedWhileInUse;
-        notifyListeners();
-        return;
-      }
-    }
-
-    _permissionStatus = LocationPermissionStatus.grantedAlways;
-    notifyListeners();
+  // Dispose the observer
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
   }
 }

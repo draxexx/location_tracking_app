@@ -3,47 +3,36 @@ import 'package:geolocator/geolocator.dart';
 import 'package:location_tracking_app/core/utils/consts/enums/location_permission_status.dart';
 import 'package:location_tracking_app/services/geolocator_service.dart';
 
-class GeolocatorProvider extends ChangeNotifier {
+class GeolocatorProvider with ChangeNotifier {
   final GeolocatorService geolocatorService;
 
-  LocationPermissionState _permissionState = LocationPermissionState(
-    status: LocationPermissionStatus.initial,
-  );
-
-  LocationPermissionState get permissionState => _permissionState;
-
-  Position? _currentPosition;
-  Position? get currentPosition => _currentPosition;
+  LocationPermissionStatus _permissionStatus = LocationPermissionStatus.initial;
+  LocationPermissionStatus get permissionStatus => _permissionStatus;
 
   GeolocatorProvider({required this.geolocatorService});
 
+  /// Checks the location permission status and requests if necessary
   Future<void> checkAndRequestPermission() async {
     final serviceEnabled = await geolocatorService.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      _permissionState = LocationPermissionState(
-        status: LocationPermissionStatus.serviceDisabled,
-      );
+      _permissionStatus = LocationPermissionStatus.serviceDisabled;
       notifyListeners();
       return;
     }
 
-    final permission = await geolocatorService.checkPermission();
+    LocationPermission permission = await geolocatorService.checkPermission();
 
     if (permission == LocationPermission.denied) {
-      final requested = await geolocatorService.requestPermission();
-      if (requested == LocationPermission.denied) {
-        _permissionState = LocationPermissionState(
-          status: LocationPermissionStatus.denied,
-        );
+      permission = await geolocatorService.requestPermission();
+      if (permission == LocationPermission.denied) {
+        _permissionStatus = LocationPermissionStatus.denied;
         notifyListeners();
         return;
       }
     }
 
     if (permission == LocationPermission.deniedForever) {
-      _permissionState = LocationPermissionState(
-        status: LocationPermissionStatus.deniedForever,
-      );
+      _permissionStatus = LocationPermissionStatus.deniedForever;
       notifyListeners();
       return;
     }
@@ -51,22 +40,13 @@ class GeolocatorProvider extends ChangeNotifier {
     if (permission == LocationPermission.whileInUse) {
       final needsAlways = await geolocatorService.needsAlwaysPermission();
       if (needsAlways) {
-        _permissionState = LocationPermissionState(
-          status: LocationPermissionStatus.grantedWhileInUse,
-        );
+        _permissionStatus = LocationPermissionStatus.grantedWhileInUse;
         notifyListeners();
         return;
       }
     }
 
-    _permissionState = LocationPermissionState(
-      status: LocationPermissionStatus.grantedAlways,
-    );
-    notifyListeners();
-  }
-
-  Future<void> fetchCurrentLocation() async {
-    _currentPosition = await geolocatorService.getCurrentPosition();
+    _permissionStatus = LocationPermissionStatus.grantedAlways;
     notifyListeners();
   }
 }

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:get_it/get_it.dart';
 import 'package:location_tracking_app/core/utils/consts/hive_boxes.dart';
+import 'package:location_tracking_app/core/utils/log_helper.dart';
 import 'package:location_tracking_app/models/location.dart';
 import 'package:location_tracking_app/models/location_track.dart';
 import 'package:location_tracking_app/models/location_track_day.dart';
@@ -25,6 +26,14 @@ final class ApplicationInitialize {
     await _hiveInitialization();
     _setupLocator();
     _setSystemConfigurations();
+
+    // Log Flutter Errors
+    FlutterError.onError = (details) {
+      /// crashlytics log insert here
+      /// custom service or custom logger insert here
+      LogHelper.error(details.exceptionAsString());
+      FlutterError.presentError(details);
+    };
   }
 
   // This method is used to set the system configurations
