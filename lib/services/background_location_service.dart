@@ -32,7 +32,7 @@ final class BackgroundLocationService {
       return await BackgroundLocation.isServiceRunning();
     } catch (e) {
       LogHelper.error("Error checking if service is running: $e");
-      return false;
+      rethrow;
     }
   }
 
@@ -51,6 +51,7 @@ final class BackgroundLocationService {
       LogHelper.info("Background location service started");
     } catch (e) {
       LogHelper.error("Error starting background location service: $e");
+      rethrow;
     }
   }
 
@@ -66,6 +67,7 @@ final class BackgroundLocationService {
       LogHelper.info("Background location service stopped");
     } catch (e) {
       LogHelper.error("Error stopping background location service: $e");
+      rethrow;
     }
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:location_tracking_app/core/utils/consts/enums/location_permission_status.dart';
+import 'package:location_tracking_app/core/utils/log_helper.dart';
 import 'package:location_tracking_app/services/geolocator_service.dart';
 
 class GeolocatorProvider with ChangeNotifier {
@@ -13,40 +14,44 @@ class GeolocatorProvider with ChangeNotifier {
 
   /// Checks the location permission status and requests if necessary
   Future<void> checkAndRequestPermission() async {
-    final serviceEnabled = await geolocatorService.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      _permissionStatus = LocationPermissionStatus.serviceDisabled;
-      notifyListeners();
-      return;
-    }
+    try {
+      final serviceEnabled = await geolocatorService.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        _permissionStatus = LocationPermissionStatus.serviceDisabled;
+        notifyListeners();
+        return;
+      }
 
-    LocationPermission permission = await geolocatorService.checkPermission();
+      LocationPermission permission = await geolocatorService.checkPermission();
 
-    if (permission == LocationPermission.denied) {
-      permission = await geolocatorService.requestPermission();
       if (permission == LocationPermission.denied) {
-        _permissionStatus = LocationPermissionStatus.denied;
+        permission = await geolocatorService.requestPermission();
+        if (permission == LocationPermission.denied) {
+          _permissionStatus = LocationPermissionStatus.denied;
+          notifyListeners();
+          return;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        _permissionStatus = LocationPermissionStatus.deniedForever;
         notifyListeners();
         return;
       }
-    }
 
-    if (permission == LocationPermission.deniedForever) {
-      _permissionStatus = LocationPermissionStatus.deniedForever;
+      if (permission == LocationPermission.whileInUse) {
+        final needsAlways = await geolocatorService.needsAlwaysPermission();
+        if (needsAlways) {
+          _permissionStatus = LocationPermissionStatus.grantedWhileInUse;
+          notifyListeners();
+          return;
+        }
+      }
+
+      _permissionStatus = LocationPermissionStatus.grantedAlways;
       notifyListeners();
-      return;
+    } catch (e) {
+      LogHelper.error("Error in checkAndRequestPermission: $e");
     }
-
-    if (permission == LocationPermission.whileInUse) {
-      final needsAlways = await geolocatorService.needsAlwaysPermission();
-      if (needsAlways) {
-        _permissionStatus = LocationPermissionStatus.grantedWhileInUse;
-        notifyListeners();
-        return;
-      }
-    }
-
-    _permissionStatus = LocationPermissionStatus.grantedAlways;
-    notifyListeners();
   }
 }

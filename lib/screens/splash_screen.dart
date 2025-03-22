@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:location_tracking_app/core/init/application_initialize.dart';
+import 'package:location_tracking_app/core/utils/log_helper.dart';
 import 'package:location_tracking_app/providers/location_provider.dart';
 import 'package:location_tracking_app/providers/location_track_day_provider.dart';
 import 'package:location_tracking_app/screens/main_screen/main_screen.dart';
@@ -14,7 +15,9 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen> {
   // This method is used to redirect to the main screen
   void _redirectToMain() {
-    Navigator.pushReplacement(context, MainScreen.route());
+    if (mounted) {
+      Navigator.pushReplacement(context, MainScreen.route());
+    }
   }
 
   // This method is used to initialize the locations
@@ -31,10 +34,14 @@ class _SplashScreenState extends State<SplashScreen> {
 
   // This method is used to initialize data
   Future<void> _initialize() async {
-    await _initializeLocations();
-    await _initializeLocationTrackDay();
+    try {
+      await _initializeLocations();
+      await _initializeLocationTrackDay();
 
-    _redirectToMain();
+      _redirectToMain();
+    } catch (e, stack) {
+      LogHelper.error('$e\n$stack');
+    }
   }
 
   @override
