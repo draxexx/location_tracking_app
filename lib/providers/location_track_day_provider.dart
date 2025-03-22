@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:location_tracking_app/core/init/application_initialize.dart';
+import 'package:location_tracking_app/core/utils/extensions/datetime_extensions.dart';
 import 'package:location_tracking_app/models/location.dart';
 import 'package:location_tracking_app/models/location_track.dart';
 import 'package:location_tracking_app/models/location_track_day.dart';
@@ -40,7 +41,7 @@ class LocationTrackDayProvider with ChangeNotifier {
     if (_isTracking) return;
 
     await backgroundLocationService.startLocationService();
-    backgroundLocationService.getLocationUpdates(handleLocationUpdate);
+    backgroundLocationService.getLocationUpdates(_handleLocationUpdate);
 
     _lastUpdate = DateTime.now();
     _isTracking = true;
@@ -68,7 +69,7 @@ class LocationTrackDayProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void handleLocationUpdate(Position position) {
+  void _handleLocationUpdate(Position position) {
     _updateTimeSpent(DateTime.now());
 
     final matched = _getMatchedLocations(position);
@@ -79,16 +80,17 @@ class LocationTrackDayProvider with ChangeNotifier {
   void _updateTimeSpent(DateTime now) {
     if (_lastUpdate == null ||
         _activeLocations.isEmpty ||
-        _locationTrackDay == null)
+        _locationTrackDay == null) {
       return;
+    }
 
     DateTime last = _lastUpdate!;
 
-    while (!_isSameDay(last, now)) {
+    while (!last.isSameDay(now)) {
       final midnight = DateTime(last.year, last.month, last.day + 1);
       final delta = midnight.difference(last).inSeconds;
 
-      _applyDeltaToTracks(delta, midnight.subtract(Duration(seconds: 1)));
+      _applyDeltaToTracks(delta, midnight.subtract(const Duration(seconds: 1)));
       _saveCurrentTrackDay();
       last = midnight;
 
@@ -177,10 +179,6 @@ class LocationTrackDayProvider with ChangeNotifier {
       (track) =>
           track.location.latitude == null && track.location.longitude == null,
     );
-  }
-
-  bool _isSameDay(DateTime a, DateTime b) {
-    return a.year == b.year && a.month == b.month && a.day == b.day;
   }
 
   /// Loads the location track day for today
