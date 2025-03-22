@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:location_tracking_app/core/layouts/base_screen_layout.dart';
+import 'package:location_tracking_app/core/widgets/custom_button.dart';
 import 'package:location_tracking_app/providers/location_track_day_provider.dart';
 import 'package:location_tracking_app/screens/past_days_screen/past_days_screen.dart';
 import 'package:location_tracking_app/screens/summary_screen/widgets/summary_items.dart';
@@ -29,14 +30,9 @@ class SummaryScreen extends StatelessWidget {
                   [],
             ),
           ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => PastDaysScreen()),
-              );
-            },
-            child: Text('Go to Past Days Screen'),
+          CustomButton(
+            onPressed: () => Navigator.push(context, PastDaysScreen.route()),
+            text: "Display Past Days",
           ),
         ],
       ),

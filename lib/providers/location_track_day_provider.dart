@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:location_tracking_app/core/init/application_initialize.dart';
+import 'package:location_tracking_app/models/location.dart';
 import 'package:location_tracking_app/models/location_track.dart';
 import 'package:location_tracking_app/models/location_track_day.dart';
 import 'package:location_tracking_app/providers/location_provider.dart';
@@ -26,6 +27,8 @@ class LocationTrackDayProvider with ChangeNotifier {
   LocationTrackDay? get locationTrackDay => _locationTrackDay;
 
   bool _isTracking = false;
+  bool get isTracking => _isTracking;
+
   DateTime? _lastUpdate;
   List<LocationTrack> _activeLocations = [];
   Timer? _tickTimer;
@@ -42,9 +45,10 @@ class LocationTrackDayProvider with ChangeNotifier {
     _lastUpdate = DateTime.now();
     _isTracking = true;
 
-    _tickTimer = Timer.periodic(Duration(seconds: 30), (_) {
+    _tickTimer = Timer.periodic(const Duration(seconds: 30), (_) {
       _updateTimeSpent(DateTime.now());
     });
+    notifyListeners();
   }
 
   /// Stops the location tracking service and finalizes any remaining duration
@@ -61,6 +65,7 @@ class LocationTrackDayProvider with ChangeNotifier {
     _activeLocations = [];
     _lastUpdate = null;
     _isTracking = false;
+    notifyListeners();
   }
 
   void handleLocationUpdate(Position position) {
@@ -219,6 +224,7 @@ class LocationTrackDayProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  /// Refreshes the location track day with the latest locations
   void refreshTrackDayWithNewLocations() {
     if (_locationTrackDay == null) return;
 
@@ -242,5 +248,19 @@ class LocationTrackDayProvider with ChangeNotifier {
       locationTracks: updatedTracks,
     );
     notifyListeners();
+  }
+
+  /// Adds a new location and refreshes the location track day
+  Future<void> addLocationAndRefreshTrackDay(String name) async {
+    final position = await geolocatorService.determinePosition();
+
+    final newLocation = Location(
+      displayName: name,
+      latitude: position.latitude,
+      longitude: position.longitude,
+    );
+
+    await getIt<LocationProvider>().addLocation(newLocation);
+    refreshTrackDayWithNewLocations();
   }
 }
