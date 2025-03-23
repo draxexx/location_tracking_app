@@ -6,24 +6,28 @@ import 'package:location_tracking_app/core/utils/log_helper.dart';
 final class BackgroundLocationService {
   /// This method is used to get the current location updates
   void getLocationUpdates(Function(Position) onLocationChanged) {
-    BackgroundLocation.getLocationUpdates((location) {
-      if (location.latitude == null || location.longitude == null) return;
+    try {
+      BackgroundLocation.getLocationUpdates((location) {
+        if (location.latitude == null || location.longitude == null) return;
 
-      final position = Position(
-        latitude: location.latitude!,
-        longitude: location.longitude!,
-        timestamp: DateTime.now(),
-        accuracy: 0,
-        altitude: 0,
-        heading: 0,
-        speed: 0,
-        speedAccuracy: 0,
-        altitudeAccuracy: 0,
-        headingAccuracy: 0,
-      );
+        final position = Position(
+          latitude: location.latitude!,
+          longitude: location.longitude!,
+          timestamp: DateTime.now(),
+          accuracy: location.accuracy ?? 0,
+          altitude: location.altitude ?? 0,
+          heading: 0,
+          speed: location.speed ?? 0,
+          speedAccuracy: 0,
+          altitudeAccuracy: 0,
+          headingAccuracy: 0,
+        );
 
-      onLocationChanged(position);
-    });
+        onLocationChanged(position);
+      });
+    } catch (e) {
+      LogHelper.error("Error getting location updates: $e");
+    }
   }
 
   /// This method is used to check if the location service is running
@@ -32,7 +36,7 @@ final class BackgroundLocationService {
       return await BackgroundLocation.isServiceRunning();
     } catch (e) {
       LogHelper.error("Error checking if service is running: $e");
-      rethrow;
+      return false;
     }
   }
 
@@ -51,7 +55,6 @@ final class BackgroundLocationService {
       LogHelper.info("Background location service started");
     } catch (e) {
       LogHelper.error("Error starting background location service: $e");
-      rethrow;
     }
   }
 
@@ -67,7 +70,6 @@ final class BackgroundLocationService {
       LogHelper.info("Background location service stopped");
     } catch (e) {
       LogHelper.error("Error stopping background location service: $e");
-      rethrow;
     }
   }
 }

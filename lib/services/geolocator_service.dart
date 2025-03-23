@@ -103,7 +103,6 @@ final class GeolocatorService {
       await Geolocator.openAppSettings();
     } catch (e) {
       LogHelper.error("Error opening location settings: $e");
-      rethrow;
     }
   }
 }

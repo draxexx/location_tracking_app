@@ -15,20 +15,25 @@ class SummaryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final locationTracks =
+        context
+            .watch<LocationTrackDayProvider>()
+            .locationTrackDay
+            ?.locationTracks;
+
+    final bool hasLocationTracks =
+        locationTracks != null && locationTracks.isNotEmpty;
+
     return BaseScreenLayout(
       title: "Summary Screen",
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Expanded(
-            child: SummaryItems(
-              locationTracks:
-                  context
-                      .watch<LocationTrackDayProvider>()
-                      .locationTrackDay
-                      ?.locationTracks ??
-                  [],
-            ),
+            child:
+                hasLocationTracks
+                    ? SummaryItems(locationTracks: locationTracks)
+                    : const Center(child: Text("No location tracks recorded")),
           ),
           CustomButton(
             onPressed: () => Navigator.push(context, PastDaysScreen.route()),

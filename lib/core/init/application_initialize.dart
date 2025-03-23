@@ -105,6 +105,7 @@ final class ApplicationInitialize {
         backgroundLocationService: getIt<BackgroundLocationService>(),
         geolocatorService: getIt<GeolocatorService>(),
         storage: getIt<LocalStorageManager<LocationTrackDay>>(),
+        locationProvider: getIt<LocationProvider>(),
       ),
     );
     getIt.registerLazySingleton<GeolocatorProvider>(

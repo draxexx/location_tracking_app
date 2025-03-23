@@ -4,12 +4,10 @@ import 'package:location_tracking_app/core/layouts/base_screen_layout.dart';
 import 'package:location_tracking_app/core/utils/permission_helper.dart';
 import 'package:location_tracking_app/core/widgets/add_location_dialog.dart';
 import 'package:location_tracking_app/core/widgets/custom_button.dart';
-import 'package:location_tracking_app/models/location.dart';
-import 'package:location_tracking_app/models/location_track_day.dart';
 import 'package:location_tracking_app/providers/geolocator_provider.dart';
 import 'package:location_tracking_app/providers/location_track_day_provider.dart';
 import 'package:location_tracking_app/screens/summary_screen/summary_screen.dart';
-import 'package:location_tracking_app/services/local_storage/local_storage_manager.dart';
+import 'package:location_tracking_app/services/geolocator_service.dart';
 import 'package:provider/provider.dart';
 
 class MainScreen extends StatelessWidget {
@@ -19,13 +17,9 @@ class MainScreen extends StatelessWidget {
     return MaterialPageRoute(builder: (_) => MainScreen());
   }
 
-  final LocalStorageManager<LocationTrackDay> storageManager =
-      getIt<LocalStorageManager<LocationTrackDay>>();
-  final LocalStorageManager<Location> storageManager2 =
-      getIt<LocalStorageManager<Location>>();
-
   final _locationTrackDayProvider = getIt<LocationTrackDayProvider>();
   final _geolocatorProvider = getIt<GeolocatorProvider>();
+  final geolocatorService = getIt<GeolocatorService>();
 
   Future<bool> _hasPermission(BuildContext context) async {
     await _geolocatorProvider.checkAndRequestPermission();
@@ -34,6 +28,7 @@ class MainScreen extends StatelessWidget {
       return await PermissionHelper.checkAndRequestPermission(
         context: context,
         permissionStatus: _geolocatorProvider.permissionStatus,
+        geolocatorService: geolocatorService,
       );
     }
 
@@ -92,17 +87,9 @@ class MainScreen extends StatelessWidget {
               text: "Clock Out",
               isDisabled: !isTracking,
             ),
-            ElevatedButton(
-              onPressed: () => storageManager.clear(),
-              child: const Text('Clear Tracks'),
-            ),
-            ElevatedButton(
-              onPressed: () => storageManager2.clear(),
-              child: const Text('Clear Locations'),
-            ),
             CustomButton(
               onPressed: () => _addNewLocation(context),
-              text: "Add Location",
+              text: "Save Current Location",
               isDisabled: isTracking,
             ),
             CustomButton(

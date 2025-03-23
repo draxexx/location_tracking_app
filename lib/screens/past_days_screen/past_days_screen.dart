@@ -29,7 +29,15 @@ class PastDaysScreen extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
 
+          if (snapshot.hasError) {
+            return const Center(child: Text("An error occurred."));
+          }
+
           final days = snapshot.data as List<LocationTrackDay>;
+
+          if (days.isEmpty) {
+            return const Center(child: Text("No records for past days."));
+          }
 
           return _PastDaysItems(locationTrackDays: days);
         },

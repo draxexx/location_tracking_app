@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:location_tracking_app/core/utils/log_helper.dart';
 import 'package:location_tracking_app/models/location.dart';
 import 'package:location_tracking_app/services/local_storage/local_storage_manager.dart';
 
@@ -13,28 +14,43 @@ class LocationProvider with ChangeNotifier {
 
   /// This method is used to load locations
   Future<void> loadLocations() async {
-    _locations = await storage.getAll();
-    notifyListeners();
+    try {
+      _locations = await storage.getAll();
+      notifyListeners();
+    } catch (e) {
+      _locations = [];
+      LogHelper.error('Error loading locations: $e');
+    }
   }
 
   /// This method is used to add a location
   Future<void> addLocation(Location location) async {
-    await storage.add(location.displayName.toLowerCase(), location);
-    _locations.add(location);
-    notifyListeners();
+    try {
+      await storage.add(location.displayName.toLowerCase(), location);
+      _locations.add(location);
+      notifyListeners();
+    } catch (e) {
+      LogHelper.error('Error adding location: $e');
+    }
   }
 
   /// This method is used to ensure that the travel location exists
   /// If it does not exist, it will be added
   Future<void> ensureTravelLocationExists() async {
-    final exists = _locations.any(
-      (loc) =>
-          loc.displayName.toLowerCase() == 'travel' &&
-          loc.latitude == null &&
-          loc.longitude == null,
-    );
-    if (!exists) {
-      await addLocation(const Location(displayName: 'Travel'));
+    try {
+      if (_locations.isEmpty) return;
+
+      final exists = _locations.any(
+        (loc) =>
+            loc.displayName.toLowerCase() == 'travel' &&
+            loc.latitude == null &&
+            loc.longitude == null,
+      );
+      if (!exists) {
+        await addLocation(const Location(displayName: 'Travel'));
+      }
+    } catch (e) {
+      LogHelper.error('Error ensuring travel location exists: $e');
     }
   }
 }
