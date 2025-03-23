@@ -162,7 +162,6 @@ class LocationTrackDayProvider with ChangeNotifier, WidgetsBindingObserver {
         locationTracks: updatedTracks,
       );
 
-      print("Updated tracks: $_locationTrackDay");
       notifyListeners();
     } catch (e) {
       LogHelper.error("Error applying delta to tracks: $e");
