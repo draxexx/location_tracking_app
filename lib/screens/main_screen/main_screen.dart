@@ -82,16 +82,19 @@ class MainScreen extends StatelessWidget {
               text: "Clock In",
               isDisabled: isTracking,
             ),
+            const SizedBox(height: 8),
             CustomButton(
               onPressed: _stopTracking,
               text: "Clock Out",
               isDisabled: !isTracking,
             ),
+            const SizedBox(height: 8),
             CustomButton(
               onPressed: () => _addNewLocation(context),
               text: "Save Current Location",
               isDisabled: isTracking,
             ),
+            const SizedBox(height: 8),
             CustomButton(
               onPressed: () => Navigator.push(context, SummaryScreen.route()),
               text: "Display Summary",

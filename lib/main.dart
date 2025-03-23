@@ -15,7 +15,6 @@ void main() async {
       runApp(const MyApp());
     },
     (Object error, StackTrace stackTrace) {
-      // Async hataları yakala
       LogHelper.error('$error\n$stackTrace');
     },
   );

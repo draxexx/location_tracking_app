@@ -38,8 +38,6 @@ class LocationProvider with ChangeNotifier {
   /// If it does not exist, it will be added
   Future<void> ensureTravelLocationExists() async {
     try {
-      if (_locations.isEmpty) return;
-
       final exists = _locations.any(
         (loc) =>
             loc.displayName.toLowerCase() == 'travel' &&
