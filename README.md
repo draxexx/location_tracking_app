@@ -15,6 +15,7 @@ lib/
 ## Key Features
 
 • Real-time location tracking in both foreground and background  
+• Users can save their current location for tracking.    
 • State management using Provider  
 • Local data caching with Hive  
 • Basic error handling and management   
