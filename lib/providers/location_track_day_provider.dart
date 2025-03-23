@@ -39,20 +39,26 @@ class LocationTrackDayProvider with ChangeNotifier, WidgetsBindingObserver {
   Timer? _tickTimer;
 
   final double _geofenceRadius = 50;
+  final double _distanceFilter = 30;
+  final int _timerPeriodInMinutes = 1;
 
   /// Starts the location tracking service and listens for updates
   Future<void> startTracking() async {
     try {
       if (_isTracking) return;
 
-      await backgroundLocationService.startLocationService(distanceFilter: 30);
+      await backgroundLocationService.startLocationService(
+        distanceFilter: _distanceFilter,
+      );
       backgroundLocationService.getLocationUpdates(_handleLocationUpdate);
 
       _lastUpdate = DateTime.now();
       _isTracking = true;
 
       // If the user is not moving, then update the time spent every minute
-      _tickTimer = Timer.periodic(const Duration(minutes: 1), (_) {
+      _tickTimer = Timer.periodic(Duration(minutes: _timerPeriodInMinutes), (
+        _,
+      ) {
         _updateTimeSpent(DateTime.now());
       });
       notifyListeners();
