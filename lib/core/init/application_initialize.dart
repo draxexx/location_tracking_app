@@ -4,11 +4,11 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:get_it/get_it.dart';
 import 'package:location_tracking_app/core/utils/consts/hive_boxes.dart';
 import 'package:location_tracking_app/core/utils/log_helper.dart';
-import 'package:location_tracking_app/models/location.dart';
-import 'package:location_tracking_app/models/location_track.dart';
-import 'package:location_tracking_app/models/location_track_day.dart';
+import 'package:location_tracking_app/models/place.dart';
+import 'package:location_tracking_app/models/place_entry.dart';
+import 'package:location_tracking_app/models/daily_place_entry.dart';
 import 'package:location_tracking_app/providers/geolocator_provider.dart';
-import 'package:location_tracking_app/providers/location_provider.dart';
+import 'package:location_tracking_app/providers/place_provider.dart';
 import 'package:location_tracking_app/providers/location_track_day_provider.dart';
 import 'package:location_tracking_app/services/background_location_service.dart';
 import 'package:location_tracking_app/services/geolocator_service.dart';
@@ -59,13 +59,13 @@ final class ApplicationInitialize {
     await Hive.initFlutter();
 
     // Register Adapters
-    Hive.registerAdapter(LocationAdapter());
-    Hive.registerAdapter(LocationTrackAdapter());
-    Hive.registerAdapter(LocationTrackDayAdapter());
+    Hive.registerAdapter(PlaceAdapter());
+    Hive.registerAdapter(PlaceEntryAdapter());
+    Hive.registerAdapter(DailyPlaceEntryAdapter());
 
     // Open Boxes
-    await Hive.openBox<LocationTrackDay>(HiveBoxes.locationTrackDay);
-    await Hive.openBox<Location>(HiveBoxes.location);
+    await Hive.openBox<DailyPlaceEntry>(HiveBoxes.dailyPlaceEntry);
+    await Hive.openBox<Place>(HiveBoxes.place);
   }
 
   // This method is used to setup the locator
@@ -77,13 +77,13 @@ final class ApplicationInitialize {
 
   // This method is used to register the local storages
   void _registerLocalStorages() {
-    getIt.registerLazySingleton<LocalStorageManager<LocationTrackDay>>(
+    getIt.registerLazySingleton<LocalStorageManager<DailyPlaceEntry>>(
       () => HiveLocalStorage(
-        Hive.box<LocationTrackDay>(HiveBoxes.locationTrackDay),
+        Hive.box<DailyPlaceEntry>(HiveBoxes.dailyPlaceEntry),
       ),
     );
-    getIt.registerLazySingleton<LocalStorageManager<Location>>(
-      () => HiveLocalStorage(Hive.box<Location>(HiveBoxes.location)),
+    getIt.registerLazySingleton<LocalStorageManager<Place>>(
+      () => HiveLocalStorage(Hive.box<Place>(HiveBoxes.place)),
     );
   }
 
@@ -97,15 +97,15 @@ final class ApplicationInitialize {
 
   // This method is used to register the providers
   void _registerProviders() {
-    getIt.registerLazySingleton<LocationProvider>(
-      () => LocationProvider(storage: getIt<LocalStorageManager<Location>>()),
+    getIt.registerLazySingleton<PlaceProvider>(
+      () => PlaceProvider(storage: getIt<LocalStorageManager<Place>>()),
     );
-    getIt.registerLazySingleton<LocationTrackDayProvider>(
-      () => LocationTrackDayProvider(
+    getIt.registerLazySingleton<DailyPlaceEntryProvider>(
+      () => DailyPlaceEntryProvider(
         backgroundLocationService: getIt<BackgroundLocationService>(),
         geolocatorService: getIt<GeolocatorService>(),
-        storage: getIt<LocalStorageManager<LocationTrackDay>>(),
-        locationProvider: getIt<LocationProvider>(),
+        storage: getIt<LocalStorageManager<DailyPlaceEntry>>(),
+        placeProvider: getIt<PlaceProvider>(),
       ),
     );
     getIt.registerLazySingleton<GeolocatorProvider>(

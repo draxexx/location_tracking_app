@@ -1,35 +1,38 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'location_track_day.dart';
+part of 'place_entry.dart';
 
 // **************************************************************************
 // TypeAdapterGenerator
 // **************************************************************************
 
-class LocationTrackDayAdapter extends TypeAdapter<LocationTrackDay> {
+class PlaceEntryAdapter extends TypeAdapter<PlaceEntry> {
   @override
-  final int typeId = 2;
+  final int typeId = 1;
 
   @override
-  LocationTrackDay read(BinaryReader reader) {
+  PlaceEntry read(BinaryReader reader) {
     final numOfFields = reader.readByte();
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    return LocationTrackDay(
-      date: fields[0] as DateTime?,
-      locationTracks: (fields[1] as List?)?.cast<LocationTrack>(),
+    return PlaceEntry(
+      place: fields[0] as Place,
+      lastUpdated: fields[1] as DateTime?,
+      timeSpent: fields[2] as int,
     );
   }
 
   @override
-  void write(BinaryWriter writer, LocationTrackDay obj) {
+  void write(BinaryWriter writer, PlaceEntry obj) {
     writer
-      ..writeByte(2)
+      ..writeByte(3)
       ..writeByte(0)
-      ..write(obj.date)
+      ..write(obj.place)
       ..writeByte(1)
-      ..write(obj.locationTracks);
+      ..write(obj.lastUpdated)
+      ..writeByte(2)
+      ..write(obj.timeSpent);
   }
 
   @override
@@ -38,7 +41,7 @@ class LocationTrackDayAdapter extends TypeAdapter<LocationTrackDay> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is LocationTrackDayAdapter &&
+      other is PlaceEntryAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

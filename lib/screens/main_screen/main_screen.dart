@@ -17,7 +17,7 @@ class MainScreen extends StatelessWidget {
     return MaterialPageRoute(builder: (_) => MainScreen());
   }
 
-  final _locationTrackDayProvider = getIt<LocationTrackDayProvider>();
+  final _dailyPlaceEntryProvider = getIt<DailyPlaceEntryProvider>();
   final _geolocatorProvider = getIt<GeolocatorProvider>();
   final geolocatorService = getIt<GeolocatorService>();
 
@@ -39,15 +39,15 @@ class MainScreen extends StatelessWidget {
     final hasPermission = await _hasPermission(context);
     if (!hasPermission) return;
 
-    await _locationTrackDayProvider.startTracking();
+    await _dailyPlaceEntryProvider.startTracking();
   }
 
   void _stopTracking() async {
-    await _locationTrackDayProvider.stopTracking();
+    await _dailyPlaceEntryProvider.stopTracking();
   }
 
-  // Add a new location to the list of locations
-  void _addNewLocation(BuildContext context) async {
+  // Add a new place to the list of places
+  void _addNewPlace(BuildContext context) async {
     final hasPermission = await _hasPermission(context);
     if (!hasPermission) return;
 
@@ -55,12 +55,14 @@ class MainScreen extends StatelessWidget {
       showAddLocationDialog(
         context: context,
         onSubmit: (name) async {
-          await _locationTrackDayProvider.addLocationAndRefreshTrackDay(name);
+          await _dailyPlaceEntryProvider.addPlaceAndRefreshDailyPlaceEntry(
+            name,
+          );
 
           if (context.mounted) {
             ScaffoldMessenger.of(
               context,
-            ).showSnackBar(SnackBar(content: Text("Location added: $name")));
+            ).showSnackBar(SnackBar(content: Text("Place added: $name")));
           }
         },
       );
@@ -69,7 +71,7 @@ class MainScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    bool isTracking = context.watch<LocationTrackDayProvider>().isTracking;
+    bool isTracking = context.watch<DailyPlaceEntryProvider>().isTracking;
 
     return BaseScreenLayout(
       title: "Main Screen",
@@ -90,8 +92,8 @@ class MainScreen extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             CustomButton(
-              onPressed: () => _addNewLocation(context),
-              text: "Save Current Location",
+              onPressed: () => _addNewPlace(context),
+              text: "Save Current Place",
               isDisabled: isTracking,
             ),
             const SizedBox(height: 8),

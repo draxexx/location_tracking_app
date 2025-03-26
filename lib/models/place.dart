@@ -1,10 +1,10 @@
 import 'package:equatable/equatable.dart';
 import 'package:hive/hive.dart';
 
-part 'location.g.dart';
+part 'place.g.dart';
 
 @HiveType(typeId: 0)
-class Location extends Equatable {
+class Place extends Equatable {
   @HiveField(0)
   final String displayName;
 
@@ -14,22 +14,18 @@ class Location extends Equatable {
   @HiveField(2)
   final double? longitude;
 
-  const Location({required this.displayName, this.latitude, this.longitude});
+  const Place({required this.displayName, this.latitude, this.longitude});
 
-  Location copyWith({
-    String? displayName,
-    double? latitude,
-    double? longitude,
-  }) {
-    return Location(
+  Place copyWith({String? displayName, double? latitude, double? longitude}) {
+    return Place(
       displayName: displayName ?? this.displayName,
       latitude: latitude ?? this.latitude,
       longitude: longitude ?? this.longitude,
     );
   }
 
-  factory Location.fromJson(Map<String, dynamic> json) {
-    return Location(
+  factory Place.fromJson(Map<String, dynamic> json) {
+    return Place(
       displayName: json['displayName'] ?? '',
       latitude: (json['latitude'] as num?)?.toDouble(),
       longitude: (json['longitude'] as num?)?.toDouble(),
@@ -49,7 +45,7 @@ class Location extends Equatable {
 
   @override
   String toString() {
-    return 'Location(displayName: $displayName, latitude: $latitude, longitude: $longitude)';
+    return 'Place(displayName: $displayName, latitude: $latitude, longitude: $longitude)';
   }
 
   bool get isTravel => latitude == null || longitude == null;

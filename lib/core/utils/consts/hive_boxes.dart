@@ -1,4 +1,4 @@
 class HiveBoxes {
-  static const String locationTrackDay = 'locationTrackDayBox';
-  static const String location = 'locationBox';
+  static const String dailyPlaceEntry = 'dailyPlaceEntryBox';
+  static const String place = 'placeBox';
 }

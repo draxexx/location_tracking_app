@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:location_tracking_app/core/init/application_initialize.dart';
 import 'package:location_tracking_app/core/utils/log_helper.dart';
-import 'package:location_tracking_app/providers/location_provider.dart';
+import 'package:location_tracking_app/providers/place_provider.dart';
 import 'package:location_tracking_app/providers/location_track_day_provider.dart';
 import 'package:location_tracking_app/screens/main_screen/main_screen.dart';
 
@@ -20,23 +20,23 @@ class _SplashScreenState extends State<SplashScreen> {
     }
   }
 
-  // This method is used to initialize the locations
-  Future<void> _initializeLocations() async {
-    final locationProvider = getIt<LocationProvider>();
-    await locationProvider.loadLocations();
-    await locationProvider.ensureTravelLocationExists();
+  // This method is used to initialize the places
+  Future<void> _initializePlaces() async {
+    final placeProvider = getIt<PlaceProvider>();
+    await placeProvider.loadPlaces();
+    await placeProvider.ensureTravelPlaceExists();
   }
 
-  // This method is used to initialize the location track day
-  Future<void> _initializeLocationTrackDay() async {
-    await getIt<LocationTrackDayProvider>().initializeLocationTrackDay();
+  // This method is used to initialize the daily place entry
+  Future<void> _initializeDailyPlaceEntry() async {
+    await getIt<DailyPlaceEntryProvider>().initializeDailyPlaceEntry();
   }
 
   // This method is used to initialize data
   Future<void> _initialize() async {
     try {
-      await _initializeLocations();
-      await _initializeLocationTrackDay();
+      await _initializePlaces();
+      await _initializeDailyPlaceEntry();
 
       _redirectToMain();
     } catch (e, stack) {

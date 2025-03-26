@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:location_tracking_app/core/utils/extensions/duration_extensions.dart';
 import 'package:location_tracking_app/core/utils/extensions/integer_extensions.dart';
-import 'package:location_tracking_app/models/location_track.dart';
+import 'package:location_tracking_app/models/place_entry.dart';
 
 class SummaryItems extends StatelessWidget {
   const SummaryItems({
     super.key,
     this.shrinkWrap = false,
     this.physics,
-    required this.locationTracks,
+    required this.placeEntries,
   });
 
   final bool shrinkWrap;
   final ScrollPhysics? physics;
-  final List<LocationTrack> locationTracks;
+  final List<PlaceEntry> placeEntries;
 
   @override
   Widget build(BuildContext context) {
@@ -21,22 +21,21 @@ class SummaryItems extends StatelessWidget {
       shrinkWrap: shrinkWrap,
       physics: physics,
       itemBuilder:
-          (context, index) =>
-              _SummaryItem(locationTrack: locationTracks[index]),
-      itemCount: locationTracks.length,
+          (context, index) => _SummaryItem(placeEntry: placeEntries[index]),
+      itemCount: placeEntries.length,
     );
   }
 }
 
 class _SummaryItem extends StatelessWidget {
-  const _SummaryItem({required this.locationTrack});
+  const _SummaryItem({required this.placeEntry});
 
-  final LocationTrack locationTrack;
+  final PlaceEntry placeEntry;
 
   @override
   Widget build(BuildContext context) {
     return Text(
-      "\"${locationTrack.location.displayName}\": ${locationTrack.timeSpent.toDuration().formatDuration()}",
+      "\"${placeEntry.place.displayName}\": ${placeEntry.timeSpent.toDuration().formatDuration()}",
     );
   }
 }

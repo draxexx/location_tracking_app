@@ -4,41 +4,41 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:location_tracking_app/core/utils/extensions/datetime_extensions.dart';
 import 'package:location_tracking_app/core/utils/log_helper.dart';
-import 'package:location_tracking_app/models/location.dart';
-import 'package:location_tracking_app/models/location_track.dart';
-import 'package:location_tracking_app/models/location_track_day.dart';
-import 'package:location_tracking_app/providers/location_provider.dart';
+import 'package:location_tracking_app/models/place.dart';
+import 'package:location_tracking_app/models/place_entry.dart';
+import 'package:location_tracking_app/models/daily_place_entry.dart';
+import 'package:location_tracking_app/providers/place_provider.dart';
 import 'package:location_tracking_app/services/background_location_service.dart';
 import 'package:location_tracking_app/services/geolocator_service.dart';
 import 'package:location_tracking_app/services/local_storage/local_storage_manager.dart';
 
-/// This provider is used to manage the location tracking for a day
-class LocationTrackDayProvider with ChangeNotifier, WidgetsBindingObserver {
+/// This provider is used to manage the daily place entries
+class DailyPlaceEntryProvider with ChangeNotifier, WidgetsBindingObserver {
   final BackgroundLocationService backgroundLocationService;
   final GeolocatorService geolocatorService;
-  final LocalStorageManager<LocationTrackDay> storage;
-  final LocationProvider locationProvider;
+  final LocalStorageManager<DailyPlaceEntry> storage;
+  final PlaceProvider placeProvider;
 
-  LocationTrackDayProvider({
+  DailyPlaceEntryProvider({
     required this.backgroundLocationService,
     required this.geolocatorService,
     required this.storage,
-    required this.locationProvider,
+    required this.placeProvider,
   }) {
     WidgetsBinding.instance.addObserver(this);
   }
 
-  LocationTrackDay? _locationTrackDay;
-  LocationTrackDay? get locationTrackDay => _locationTrackDay;
+  DailyPlaceEntry? _dailyPlaceEntry;
+  DailyPlaceEntry? get dailyPlaceEntry => _dailyPlaceEntry;
 
   bool _isTracking = false;
   bool get isTracking => _isTracking;
 
   DateTime? _lastUpdate;
-  List<LocationTrack> _activeLocations = [];
+  List<PlaceEntry> _activePlaceEntries = [];
   Timer? _tickTimer;
 
-  final double _geofenceRadius = 50;
+  final double _geofenceRadiusInMeters = 50;
   final double _distanceFilter = 30;
   final int _timerPeriodInMinutes = 1;
 
@@ -73,13 +73,13 @@ class LocationTrackDayProvider with ChangeNotifier, WidgetsBindingObserver {
       if (!_isTracking) return;
 
       _updateTimeSpent(DateTime.now());
-      await _saveCurrentTrackDay();
+      await _saveDailyPlaceEntry();
       await backgroundLocationService.stopLocationService();
 
       _tickTimer?.cancel();
       _tickTimer = null;
 
-      _activeLocations = [];
+      _activePlaceEntries = [];
       _lastUpdate = null;
       _isTracking = false;
       notifyListeners();
@@ -93,8 +93,8 @@ class LocationTrackDayProvider with ChangeNotifier, WidgetsBindingObserver {
     try {
       _updateTimeSpent(DateTime.now());
 
-      final matched = _getMatchedLocations(position);
-      _activeLocations = matched.isNotEmpty ? matched : [_getTravelLocation()];
+      final matched = _getMatchedPlaces(position);
+      _activePlaceEntries = matched.isNotEmpty ? matched : [_getTravelPlace()];
       _lastUpdate = DateTime.now();
     } catch (e) {
       LogHelper.error("Error handling location update: $e");
@@ -105,8 +105,8 @@ class LocationTrackDayProvider with ChangeNotifier, WidgetsBindingObserver {
   void _updateTimeSpent(DateTime now) {
     try {
       if (_lastUpdate == null ||
-          _activeLocations.isEmpty ||
-          _locationTrackDay == null) {
+          _activePlaceEntries.isEmpty ||
+          _dailyPlaceEntry == null) {
         return;
       }
 
@@ -121,12 +121,12 @@ class LocationTrackDayProvider with ChangeNotifier, WidgetsBindingObserver {
           delta,
           midnight.subtract(const Duration(seconds: 1)),
         );
-        _saveCurrentTrackDay();
+        _saveDailyPlaceEntry();
         last = midnight;
 
-        _locationTrackDay = LocationTrackDay(
+        _dailyPlaceEntry = DailyPlaceEntry(
           date: DateTime(midnight.year, midnight.month, midnight.day),
-          locationTracks: _cloneTracksWithResetTime(midnight),
+          placeEntries: _cloneTracksWithResetTime(midnight),
         );
       }
 
@@ -139,17 +139,16 @@ class LocationTrackDayProvider with ChangeNotifier, WidgetsBindingObserver {
     }
   }
 
-  // Applies the delta to the active locations
+  // Applies the delta to the active place entries
   void _applyDeltaToTracks(int delta, DateTime updateTime) {
     try {
       final updatedTracks =
-          _locationTrackDay!.locationTracks!.map((track) {
-            if (_activeLocations.any(
-              (active) =>
-                  active.location.displayName == track.location.displayName,
+          _dailyPlaceEntry!.placeEntries!.map((track) {
+            if (_activePlaceEntries.any(
+              (active) => active.place.displayName == track.place.displayName,
             )) {
-              return LocationTrack(
-                location: track.location,
+              return PlaceEntry(
+                place: track.place,
                 timeSpent: track.timeSpent + delta,
                 lastUpdated: updateTime,
               );
@@ -158,25 +157,21 @@ class LocationTrackDayProvider with ChangeNotifier, WidgetsBindingObserver {
             }
           }).toList();
 
-      _locationTrackDay = _locationTrackDay!.copyWith(
-        locationTracks: updatedTracks,
+      _dailyPlaceEntry = _dailyPlaceEntry!.copyWith(
+        placeEntries: updatedTracks,
       );
 
       notifyListeners();
     } catch (e) {
-      LogHelper.error("Error applying delta to tracks: $e");
+      LogHelper.error("Error applying delta to daily place entry: $e");
     }
   }
 
   // Clones the tracks with the time reset to the given date
-  List<LocationTrack> _cloneTracksWithResetTime(DateTime date) {
+  List<PlaceEntry> _cloneTracksWithResetTime(DateTime date) {
     try {
-      return _locationTrackDay!.locationTracks!.map((track) {
-        return LocationTrack(
-          location: track.location,
-          timeSpent: 0,
-          lastUpdated: date,
-        );
+      return _dailyPlaceEntry!.placeEntries!.map((track) {
+        return PlaceEntry(place: track.place, timeSpent: 0, lastUpdated: date);
       }).toList();
     } catch (e) {
       LogHelper.error("Error cloning tracks with reset time: $e");
@@ -184,18 +179,17 @@ class LocationTrackDayProvider with ChangeNotifier, WidgetsBindingObserver {
     }
   }
 
-  // Saves the current track day to the local storage
-  Future<void> _saveCurrentTrackDay() async {
+  // Saves the daily place entry to the local storage
+  Future<void> _saveDailyPlaceEntry() async {
     try {
-      if (_locationTrackDay == null ||
-          _locationTrackDay!.locationTracks == null) {
+      if (_dailyPlaceEntry == null || _dailyPlaceEntry!.placeEntries == null) {
         return;
       }
 
-      final key = _formatDateKey(_locationTrackDay!.date!);
-      await storage.add(key, _locationTrackDay!);
+      final key = _formatDateKey(_dailyPlaceEntry!.date!);
+      await storage.add(key, _dailyPlaceEntry!);
     } catch (e) {
-      LogHelper.error("Error saving current track day: $e");
+      LogHelper.error("Error saving daily place entry: $e");
     }
   }
 
@@ -204,86 +198,84 @@ class LocationTrackDayProvider with ChangeNotifier, WidgetsBindingObserver {
     return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   }
 
-  // Get the locations that are within the geofence radius
-  List<LocationTrack> _getMatchedLocations(Position currentPosition) {
+  // Get the places that are within the geofence radius
+  List<PlaceEntry> _getMatchedPlaces(Position currentPosition) {
     try {
-      // Filter out locations that have no coordinates
+      // Filter out places that have no coordinates
       final geofences =
-          _locationTrackDay?.locationTracks
+          _dailyPlaceEntry?.placeEntries
               ?.where(
                 (track) =>
-                    track.location.latitude != null &&
-                    track.location.longitude != null,
+                    track.place.latitude != null &&
+                    track.place.longitude != null,
               )
               .toList();
 
       // If no locations are available, return an empty list
       if (geofences == null || geofences.isEmpty) return [];
 
-      // Return the locations that are within the geofence radius
+      // Return the places that are within the geofence radius
       return geofences.where((track) {
         final distance = geolocatorService.distanceBetween(
           currentPosition.latitude,
           currentPosition.longitude,
-          track.location.latitude!,
-          track.location.longitude!,
+          track.place.latitude!,
+          track.place.longitude!,
         );
-        return distance <= _geofenceRadius;
+        return distance <= _geofenceRadiusInMeters;
       }).toList();
     } catch (e) {
-      LogHelper.error("Error getting matched locations: $e");
+      LogHelper.error("Error getting matched places: $e");
       return [];
     }
   }
 
-  // Get the travel location track
-  LocationTrack _getTravelLocation() {
+  // Get the travel place
+  PlaceEntry _getTravelPlace() {
     try {
-      return _locationTrackDay!.locationTracks!.firstWhere(
+      return _dailyPlaceEntry!.placeEntries!.firstWhere(
         (track) =>
-            track.location.latitude == null && track.location.longitude == null,
-        orElse:
-            () =>
-                const LocationTrack(location: Location(displayName: 'Travel')),
+            track.place.latitude == null && track.place.longitude == null,
+        orElse: () => const PlaceEntry(place: Place(displayName: 'Travel')),
       );
     } catch (e) {
-      LogHelper.error("Error getting travel location: $e");
-      return const LocationTrack(location: Location(displayName: "Travel"));
+      LogHelper.error("Error getting travel place: $e");
+      return const PlaceEntry(place: Place(displayName: "Travel"));
     }
   }
 
-  /// Loads the location track day for today
-  /// If the day does not exist, it will initialize the day with the locations
-  Future<void> initializeLocationTrackDay() async {
+  /// Loads the daily place entry
+  /// If the day does not exist, it will initialize the day with the places
+  Future<void> initializeDailyPlaceEntry() async {
     try {
       final today = DateTime.now();
       final key = _formatDateKey(today);
 
       final saved = await storage.get(key);
-      final allLocations = locationProvider.locations;
+      final allPlaces = placeProvider.places;
 
       if (saved != null) {
-        final updatedTracks = [...saved.locationTracks!];
+        final updatedPlaceEntries = [...saved.placeEntries!];
 
-        for (final loc in allLocations) {
-          final exists = updatedTracks.any(
-            (track) => track.location.displayName == loc.displayName,
+        for (final place in allPlaces) {
+          final exists = updatedPlaceEntries.any(
+            (track) => track.place.displayName == place.displayName,
           );
           if (!exists) {
-            updatedTracks.add(
-              LocationTrack(location: loc, timeSpent: 0, lastUpdated: today),
+            updatedPlaceEntries.add(
+              PlaceEntry(place: place, timeSpent: 0, lastUpdated: today),
             );
           }
         }
 
-        _locationTrackDay = saved.copyWith(locationTracks: updatedTracks);
+        _dailyPlaceEntry = saved.copyWith(placeEntries: updatedPlaceEntries);
       } else {
-        _locationTrackDay = LocationTrackDay(
+        _dailyPlaceEntry = DailyPlaceEntry(
           date: today,
-          locationTracks:
-              allLocations.map((loc) {
-                return LocationTrack(
-                  location: loc,
+          placeEntries:
+              allPlaces.map((place) {
+                return PlaceEntry(
+                  place: place,
                   lastUpdated: today,
                   timeSpent: 0,
                 );
@@ -293,55 +285,57 @@ class LocationTrackDayProvider with ChangeNotifier, WidgetsBindingObserver {
 
       notifyListeners();
     } catch (e) {
-      LogHelper.error("Error initializing location track day: $e");
+      LogHelper.error("Error initializing daily place entry: $e");
     }
   }
 
-  /// Refreshes the location track day with the latest locations
-  void refreshTrackDayWithNewLocations() {
+  /// Refreshes the daily place entry with new places
+  void refreshDailyPlaceEntryWithNewPlaces() {
     try {
-      if (_locationTrackDay == null) return;
+      if (_dailyPlaceEntry == null) return;
 
-      final allLocations = locationProvider.locations;
+      final allPlaces = placeProvider.places;
       final today = DateTime.now();
 
-      final updatedTracks = [..._locationTrackDay!.locationTracks!];
+      final updatedPlaceEntries = [..._dailyPlaceEntry!.placeEntries!];
 
-      for (final loc in allLocations) {
-        final exists = updatedTracks.any(
-          (track) => track.location.displayName == loc.displayName,
+      for (final place in allPlaces) {
+        final exists = updatedPlaceEntries.any(
+          (track) => track.place.displayName == place.displayName,
         );
         if (!exists) {
-          updatedTracks.add(
-            LocationTrack(location: loc, timeSpent: 0, lastUpdated: today),
+          updatedPlaceEntries.add(
+            PlaceEntry(place: place, timeSpent: 0, lastUpdated: today),
           );
         }
       }
 
-      _locationTrackDay = _locationTrackDay!.copyWith(
-        locationTracks: updatedTracks,
+      _dailyPlaceEntry = _dailyPlaceEntry!.copyWith(
+        placeEntries: updatedPlaceEntries,
       );
       notifyListeners();
     } catch (e) {
-      LogHelper.error("Error refreshing track day with new locations: $e");
+      LogHelper.error("Error refreshing daily place entry with new places: $e");
     }
   }
 
-  /// Adds a new location and refreshes the location track day
-  Future<void> addLocationAndRefreshTrackDay(String name) async {
+  /// Adds a new place and refreshes the daily place entry
+  Future<void> addPlaceAndRefreshDailyPlaceEntry(String name) async {
     try {
       final position = await geolocatorService.getCurrentPosition();
 
-      final newLocation = Location(
+      final newPlace = Place(
         displayName: name,
         latitude: position.latitude,
         longitude: position.longitude,
       );
 
-      await locationProvider.addLocation(newLocation);
-      refreshTrackDayWithNewLocations();
+      await placeProvider.addPlace(newPlace);
+      refreshDailyPlaceEntryWithNewPlaces();
     } catch (e) {
-      LogHelper.error("Error adding location and refreshing track day: $e");
+      LogHelper.error(
+        "Error adding place and refreshing daily place entry: $e",
+      );
     }
   }
 
@@ -349,9 +343,9 @@ class LocationTrackDayProvider with ChangeNotifier, WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) async {
     try {
-      // Save the current track day when the app is paused
+      // Save the daily place entry when the app is paused
       if (state == AppLifecycleState.paused) {
-        await _saveCurrentTrackDay();
+        await _saveDailyPlaceEntry();
       }
     } catch (e) {
       LogHelper.error("Error changing app lifecycle state: $e");

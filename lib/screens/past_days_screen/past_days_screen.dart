@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:location_tracking_app/core/init/application_initialize.dart';
 import 'package:location_tracking_app/core/layouts/base_screen_layout.dart';
 import 'package:location_tracking_app/core/utils/extensions/datetime_extensions.dart';
-import 'package:location_tracking_app/models/location_track_day.dart';
+import 'package:location_tracking_app/models/daily_place_entry.dart';
 import 'package:location_tracking_app/screens/summary_screen/widgets/summary_items.dart';
 import 'package:location_tracking_app/services/local_storage/local_storage_manager.dart';
 
@@ -15,8 +15,8 @@ class PastDaysScreen extends StatelessWidget {
     return MaterialPageRoute(builder: (_) => PastDaysScreen());
   }
 
-  final LocalStorageManager<LocationTrackDay> storageManager =
-      getIt<LocalStorageManager<LocationTrackDay>>();
+  final LocalStorageManager<DailyPlaceEntry> storageManager =
+      getIt<LocalStorageManager<DailyPlaceEntry>>();
 
   @override
   Widget build(BuildContext context) {
@@ -33,13 +33,13 @@ class PastDaysScreen extends StatelessWidget {
             return const Center(child: Text("An error occurred."));
           }
 
-          final days = snapshot.data as List<LocationTrackDay>;
+          final days = snapshot.data as List<DailyPlaceEntry>;
 
           if (days.isEmpty) {
             return const Center(child: Text("No records for past days."));
           }
 
-          return _PastDaysItems(locationTrackDays: days);
+          return _PastDaysItems(dailyPlaceEntries: days);
         },
       ),
     );
