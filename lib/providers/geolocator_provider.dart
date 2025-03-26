@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:location_tracking_app/core/utils/consts/enums/location_permission_status.dart';
-import 'package:location_tracking_app/core/utils/log_helper.dart';
+import 'package:location_tracking_app/utils/consts/enums/location_permission_status.dart';
+import 'package:location_tracking_app/utils/helpers/log_helper.dart';
 import 'package:location_tracking_app/services/geolocator_service.dart';
 
 class GeolocatorProvider with ChangeNotifier {
@@ -12,7 +12,6 @@ class GeolocatorProvider with ChangeNotifier {
 
   GeolocatorProvider({required this.geolocatorService});
 
-  /// Checks the location permission status and requests if necessary
   Future<void> checkAndRequestPermission() async {
     try {
       final serviceEnabled = await geolocatorService.isLocationServiceEnabled();

@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:geolocator/geolocator.dart';
-import 'package:location_tracking_app/core/utils/log_helper.dart';
+import 'package:location_tracking_app/utils/helpers/log_helper.dart';
 
 /// A service that provides the current location of the device.
 final class GeolocatorService {

@@ -7,10 +7,8 @@ part 'place.g.dart';
 class Place extends Equatable {
   @HiveField(0)
   final String displayName;
-
   @HiveField(1)
   final double? latitude;
-
   @HiveField(2)
   final double? longitude;
 

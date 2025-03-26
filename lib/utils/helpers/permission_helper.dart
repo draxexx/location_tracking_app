@@ -2,9 +2,9 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:location_tracking_app/core/utils/consts/enums/location_permission_status.dart';
-import 'package:location_tracking_app/core/utils/log_helper.dart';
-import 'package:location_tracking_app/core/widgets/confirm_dialog.dart';
+import 'package:location_tracking_app/utils/consts/enums/location_permission_status.dart';
+import 'package:location_tracking_app/utils/helpers/log_helper.dart';
+import 'package:location_tracking_app/widgets/confirm_dialog.dart';
 import 'package:location_tracking_app/services/geolocator_service.dart';
 
 /// The helper class for checking and requesting location permission

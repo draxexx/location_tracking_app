@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:location_tracking_app/core/init/application_initialize.dart';
-import 'package:location_tracking_app/core/layouts/base_screen_layout.dart';
-import 'package:location_tracking_app/core/utils/extensions/datetime_extensions.dart';
-import 'package:location_tracking_app/models/daily_place_entry.dart';
-import 'package:location_tracking_app/screens/summary_screen/widgets/place_entries.dart';
+import 'package:location_tracking_app/screens/summary_screen/widgets/tracked_location_entries.dart';
+import 'package:location_tracking_app/setup/application_initializer.dart';
+import 'package:location_tracking_app/widgets/layouts/base_screen_layout.dart';
+import 'package:location_tracking_app/utils/extensions/datetime_extensions.dart';
+import 'package:location_tracking_app/models/daily_summary.dart';
 import 'package:location_tracking_app/services/local_storage/local_storage_manager.dart';
 
-part 'widgets/past_daily_place_entries.dart';
+part 'widgets/past_tracked_location_entries.dart';
 
 class PastDaysScreen extends StatelessWidget {
   PastDaysScreen({super.key});
@@ -15,15 +15,15 @@ class PastDaysScreen extends StatelessWidget {
     return MaterialPageRoute(builder: (_) => PastDaysScreen());
   }
 
-  final LocalStorageManager<DailyPlaceEntry> storageManager =
-      getIt<LocalStorageManager<DailyPlaceEntry>>();
+  final LocalStorageManager<DailySummary> storage =
+      getIt<LocalStorageManager<DailySummary>>();
 
   @override
   Widget build(BuildContext context) {
     return BaseScreenLayout(
       title: "Past Days Screen",
       child: FutureBuilder(
-        future: storageManager.getAll(),
+        future: storage.getAll(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
@@ -33,13 +33,13 @@ class PastDaysScreen extends StatelessWidget {
             return const Center(child: Text("An error occurred."));
           }
 
-          final days = snapshot.data as List<DailyPlaceEntry>;
+          final dailySummaries = snapshot.data as List<DailySummary>;
 
-          if (days.isEmpty) {
+          if (dailySummaries.isEmpty) {
             return const Center(child: Text("No records for past days."));
           }
 
-          return _PastDailyPlaceEntries(dailyPlaceEntries: days);
+          return _PastTrackedLocationEntries(dailySummaries: dailySummaries);
         },
       ),
     );

@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:location_tracking_app/core/init/application_initialize.dart';
+import 'package:location_tracking_app/setup/application_initializer.dart';
 import 'package:location_tracking_app/providers/place_provider.dart';
-import 'package:location_tracking_app/providers/daily_place_entry_provider.dart';
+import 'package:location_tracking_app/providers/location_tracking_provider.dart';
 import 'package:provider/provider.dart';
 
-final class StateInitialize extends StatelessWidget {
-  const StateInitialize({required this.child, super.key});
+final class AppStateWrapper extends StatelessWidget {
+  const AppStateWrapper({required this.child, super.key});
   final Widget child;
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider<DailyPlaceEntryProvider>(
-          create: (context) => getIt<DailyPlaceEntryProvider>(),
+        ChangeNotifierProvider<LocationTrackingProvider>(
+          create: (context) => getIt<LocationTrackingProvider>(),
         ),
         ChangeNotifierProvider<PlaceProvider>(
           create: (context) => getIt<PlaceProvider>(),

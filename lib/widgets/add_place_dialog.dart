@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-void showAddLocationDialog({
+void showAddPlaceDialog({
   required BuildContext context,
   required Function(String locationName) onSubmit,
 }) {

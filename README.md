@@ -5,11 +5,13 @@ This project tracks in real-time how long users stay at predefined locations in 
 
 ```
 lib/
-├── core/           # Common utilities, constants, and helpers
 ├── models/         # Data models and entities
 ├── providers/      # State management using Provider
 ├── screens/        # UI screens and pages
 ├── services/       # Business logic and services
+├── setup/          # Application initialization logic
+├── utils/          # Common utilities, constants, and helpers
+├── widgets/        # Reusable UI components
 ```
 
 ## Key Features

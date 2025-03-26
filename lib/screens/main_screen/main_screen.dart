@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:location_tracking_app/core/init/application_initialize.dart';
-import 'package:location_tracking_app/core/layouts/base_screen_layout.dart';
-import 'package:location_tracking_app/core/utils/permission_helper.dart';
-import 'package:location_tracking_app/core/widgets/add_location_dialog.dart';
-import 'package:location_tracking_app/core/widgets/custom_button.dart';
+import 'package:location_tracking_app/setup/application_initializer.dart';
+import 'package:location_tracking_app/widgets/layouts/base_screen_layout.dart';
+import 'package:location_tracking_app/utils/helpers/permission_helper.dart';
+import 'package:location_tracking_app/widgets/add_place_dialog.dart';
+import 'package:location_tracking_app/widgets/custom_button.dart';
 import 'package:location_tracking_app/providers/geolocator_provider.dart';
-import 'package:location_tracking_app/providers/daily_place_entry_provider.dart';
+import 'package:location_tracking_app/providers/location_tracking_provider.dart';
 import 'package:location_tracking_app/screens/summary_screen/summary_screen.dart';
 import 'package:location_tracking_app/services/geolocator_service.dart';
 import 'package:provider/provider.dart';
@@ -17,7 +17,7 @@ class MainScreen extends StatelessWidget {
     return MaterialPageRoute(builder: (_) => MainScreen());
   }
 
-  final _dailyPlaceEntryProvider = getIt<DailyPlaceEntryProvider>();
+  final _locationTrackingProvider = getIt<LocationTrackingProvider>();
   final _geolocatorProvider = getIt<GeolocatorProvider>();
   final geolocatorService = getIt<GeolocatorService>();
 
@@ -39,25 +39,22 @@ class MainScreen extends StatelessWidget {
     final hasPermission = await _hasPermission(context);
     if (!hasPermission) return;
 
-    await _dailyPlaceEntryProvider.startTracking();
+    await _locationTrackingProvider.startTracking();
   }
 
   void _stopTracking() async {
-    await _dailyPlaceEntryProvider.stopTracking();
+    await _locationTrackingProvider.stopTracking();
   }
 
-  // Add a new place to the list of places
   void _addNewPlace(BuildContext context) async {
     final hasPermission = await _hasPermission(context);
     if (!hasPermission) return;
 
     if (context.mounted) {
-      showAddLocationDialog(
+      showAddPlaceDialog(
         context: context,
         onSubmit: (name) async {
-          await _dailyPlaceEntryProvider.addPlaceAndRefreshDailyPlaceEntry(
-            name,
-          );
+          await _locationTrackingProvider.addNewPlace(name);
 
           if (context.mounted) {
             ScaffoldMessenger.of(
@@ -71,7 +68,7 @@ class MainScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    bool isTracking = context.watch<DailyPlaceEntryProvider>().isTracking;
+    bool isTracking = context.watch<LocationTrackingProvider>().isTracking;
 
     return BaseScreenLayout(
       title: "Main Screen",

@@ -1,16 +1,16 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:location_tracking_app/core/init/application_initialize.dart';
-import 'package:location_tracking_app/core/init/state_initialize.dart';
-import 'package:location_tracking_app/core/utils/log_helper.dart';
+import 'package:location_tracking_app/setup/application_initializer.dart';
+import 'package:location_tracking_app/setup/app_state_wrapper.dart';
+import 'package:location_tracking_app/utils/helpers/log_helper.dart';
 import 'package:location_tracking_app/screens/splash_screen.dart';
 
 void main() async {
   runZonedGuarded(
     () async {
       // Initialize the dependencies
-      await ApplicationInitialize().init();
+      await AppInitializer().init();
 
       runApp(const MyApp());
     },
@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return StateInitialize(
+    return AppStateWrapper(
       child: MaterialApp(
         title: 'Location Tracking App',
         debugShowCheckedModeBanner: false,

@@ -1,5 +1,5 @@
 import 'package:hive/hive.dart';
-import 'package:location_tracking_app/core/utils/log_helper.dart';
+import 'package:location_tracking_app/utils/helpers/log_helper.dart';
 import 'package:location_tracking_app/services/local_storage/local_storage_manager.dart';
 
 class HiveLocalStorage<T> implements LocalStorageManager<T> {
