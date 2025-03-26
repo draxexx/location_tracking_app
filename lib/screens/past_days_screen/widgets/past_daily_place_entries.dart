@@ -1,7 +1,7 @@
 part of '../past_days_screen.dart';
 
-class _PastDaysItems extends StatelessWidget {
-  const _PastDaysItems({required this.dailyPlaceEntries});
+class _PastDailyPlaceEntries extends StatelessWidget {
+  const _PastDailyPlaceEntries({required this.dailyPlaceEntries});
 
   final List<DailyPlaceEntry> dailyPlaceEntries;
 
@@ -10,14 +10,14 @@ class _PastDaysItems extends StatelessWidget {
     return ListView.builder(
       itemBuilder:
           (context, index) =>
-              _PastDayItem(dailyPlaceEntry: dailyPlaceEntries[index]),
+              _PastDailyPlaceEntry(dailyPlaceEntry: dailyPlaceEntries[index]),
       itemCount: dailyPlaceEntries.length,
     );
   }
 }
 
-class _PastDayItem extends StatelessWidget {
-  const _PastDayItem({required this.dailyPlaceEntry});
+class _PastDailyPlaceEntry extends StatelessWidget {
+  const _PastDailyPlaceEntry({required this.dailyPlaceEntry});
 
   final DailyPlaceEntry dailyPlaceEntry;
 
@@ -29,7 +29,7 @@ class _PastDayItem extends StatelessWidget {
           dailyPlaceEntry.date?.formatDate() ?? "",
           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
         ),
-        SummaryItems(
+        PlaceEntries(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           placeEntries: dailyPlaceEntry.placeEntries ?? [],

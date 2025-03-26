@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:location_tracking_app/core/layouts/base_screen_layout.dart';
 import 'package:location_tracking_app/core/widgets/custom_button.dart';
-import 'package:location_tracking_app/providers/location_track_day_provider.dart';
+import 'package:location_tracking_app/providers/daily_place_entry_provider.dart';
 import 'package:location_tracking_app/screens/past_days_screen/past_days_screen.dart';
-import 'package:location_tracking_app/screens/summary_screen/widgets/summary_items.dart';
+import 'package:location_tracking_app/screens/summary_screen/widgets/place_entries.dart';
 import 'package:provider/provider.dart';
 
 class SummaryScreen extends StatelessWidget {
@@ -29,7 +29,7 @@ class SummaryScreen extends StatelessWidget {
           Expanded(
             child:
                 hasPlaceEntries
-                    ? SummaryItems(placeEntries: placeEntries)
+                    ? PlaceEntries(placeEntries: placeEntries)
                     : const Center(child: Text("No place entries recorded")),
           ),
           CustomButton(

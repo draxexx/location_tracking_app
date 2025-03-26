@@ -39,7 +39,7 @@ class DailyPlaceEntryProvider with ChangeNotifier, WidgetsBindingObserver {
   Timer? _tickTimer;
 
   final double _geofenceRadiusInMeters = 50;
-  final double _distanceFilter = 30;
+  final double _distanceFilterInMeters = 30;
   final int _timerPeriodInMinutes = 1;
 
   /// Starts the location tracking service and listens for updates
@@ -48,7 +48,7 @@ class DailyPlaceEntryProvider with ChangeNotifier, WidgetsBindingObserver {
       if (_isTracking) return;
 
       await backgroundLocationService.startLocationService(
-        distanceFilter: _distanceFilter,
+        distanceFilter: _distanceFilterInMeters,
       );
       backgroundLocationService.getLocationUpdates(_handleLocationUpdate);
 

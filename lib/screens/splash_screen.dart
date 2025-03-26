@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:location_tracking_app/core/init/application_initialize.dart';
 import 'package:location_tracking_app/core/utils/log_helper.dart';
 import 'package:location_tracking_app/providers/place_provider.dart';
-import 'package:location_tracking_app/providers/location_track_day_provider.dart';
+import 'package:location_tracking_app/providers/daily_place_entry_provider.dart';
 import 'package:location_tracking_app/screens/main_screen/main_screen.dart';
 
 class SplashScreen extends StatefulWidget {

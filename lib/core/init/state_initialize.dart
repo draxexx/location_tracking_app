@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:location_tracking_app/core/init/application_initialize.dart';
 import 'package:location_tracking_app/providers/place_provider.dart';
-import 'package:location_tracking_app/providers/location_track_day_provider.dart';
+import 'package:location_tracking_app/providers/daily_place_entry_provider.dart';
 import 'package:provider/provider.dart';
 
 final class StateInitialize extends StatelessWidget {

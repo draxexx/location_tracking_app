@@ -3,8 +3,8 @@ import 'package:location_tracking_app/core/utils/extensions/duration_extensions.
 import 'package:location_tracking_app/core/utils/extensions/integer_extensions.dart';
 import 'package:location_tracking_app/models/place_entry.dart';
 
-class SummaryItems extends StatelessWidget {
-  const SummaryItems({
+class PlaceEntries extends StatelessWidget {
+  const PlaceEntries({
     super.key,
     this.shrinkWrap = false,
     this.physics,
@@ -21,14 +21,14 @@ class SummaryItems extends StatelessWidget {
       shrinkWrap: shrinkWrap,
       physics: physics,
       itemBuilder:
-          (context, index) => _SummaryItem(placeEntry: placeEntries[index]),
+          (context, index) => _PlaceEntry(placeEntry: placeEntries[index]),
       itemCount: placeEntries.length,
     );
   }
 }
 
-class _SummaryItem extends StatelessWidget {
-  const _SummaryItem({required this.placeEntry});
+class _PlaceEntry extends StatelessWidget {
+  const _PlaceEntry({required this.placeEntry});
 
   final PlaceEntry placeEntry;
 

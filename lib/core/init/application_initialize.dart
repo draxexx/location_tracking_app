@@ -9,7 +9,7 @@ import 'package:location_tracking_app/models/place_entry.dart';
 import 'package:location_tracking_app/models/daily_place_entry.dart';
 import 'package:location_tracking_app/providers/geolocator_provider.dart';
 import 'package:location_tracking_app/providers/place_provider.dart';
-import 'package:location_tracking_app/providers/location_track_day_provider.dart';
+import 'package:location_tracking_app/providers/daily_place_entry_provider.dart';
 import 'package:location_tracking_app/services/background_location_service.dart';
 import 'package:location_tracking_app/services/geolocator_service.dart';
 import 'package:location_tracking_app/services/local_storage/hive_local_storage.dart';

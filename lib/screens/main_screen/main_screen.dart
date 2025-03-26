@@ -5,7 +5,7 @@ import 'package:location_tracking_app/core/utils/permission_helper.dart';
 import 'package:location_tracking_app/core/widgets/add_location_dialog.dart';
 import 'package:location_tracking_app/core/widgets/custom_button.dart';
 import 'package:location_tracking_app/providers/geolocator_provider.dart';
-import 'package:location_tracking_app/providers/location_track_day_provider.dart';
+import 'package:location_tracking_app/providers/daily_place_entry_provider.dart';
 import 'package:location_tracking_app/screens/summary_screen/summary_screen.dart';
 import 'package:location_tracking_app/services/geolocator_service.dart';
 import 'package:provider/provider.dart';
