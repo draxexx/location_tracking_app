@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:location_tracking_app/setup/application_initializer.dart';
+import 'package:location_tracking_app/setup/app_initializer.dart';
 import 'package:location_tracking_app/widgets/layouts/base_screen_layout.dart';
 import 'package:location_tracking_app/utils/helpers/permission_helper.dart';
 import 'package:location_tracking_app/widgets/add_place_dialog.dart';

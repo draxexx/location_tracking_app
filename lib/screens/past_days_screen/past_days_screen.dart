@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:location_tracking_app/screens/summary_screen/widgets/tracked_location_entries.dart';
-import 'package:location_tracking_app/setup/application_initializer.dart';
+import 'package:location_tracking_app/setup/app_initializer.dart';
 import 'package:location_tracking_app/widgets/layouts/base_screen_layout.dart';
 import 'package:location_tracking_app/utils/extensions/datetime_extensions.dart';
 import 'package:location_tracking_app/models/daily_summary.dart';

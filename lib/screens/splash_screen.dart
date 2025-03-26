@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:location_tracking_app/setup/application_initializer.dart';
+import 'package:location_tracking_app/setup/app_initializer.dart';
 import 'package:location_tracking_app/utils/helpers/log_helper.dart';
 import 'package:location_tracking_app/providers/place_provider.dart';
 import 'package:location_tracking_app/providers/location_tracking_provider.dart';

@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:location_tracking_app/setup/application_initializer.dart';
+import 'package:location_tracking_app/setup/app_initializer.dart';
 import 'package:location_tracking_app/setup/app_state_wrapper.dart';
 import 'package:location_tracking_app/utils/helpers/log_helper.dart';
 import 'package:location_tracking_app/screens/splash_screen.dart';
