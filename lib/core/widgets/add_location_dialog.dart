@@ -11,7 +11,7 @@ void showAddLocationDialog({
     context: context,
     builder: (ctx) {
       return AlertDialog(
-        title: const Text("Add New Location"),
+        title: const Text("Add New Place"),
         content: Form(
           key: formKey,
           child: TextFormField(
