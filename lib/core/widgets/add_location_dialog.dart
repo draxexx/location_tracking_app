@@ -17,11 +17,11 @@ void showAddLocationDialog({
           child: TextFormField(
             controller: controller,
             decoration: const InputDecoration(
-              hintText: "Location Name (e.g. Home)",
+              hintText: "Place Name (e.g. Home)",
             ),
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
-                return 'Please enter a location name';
+                return 'Please enter a place name';
               }
               return null;
             },
